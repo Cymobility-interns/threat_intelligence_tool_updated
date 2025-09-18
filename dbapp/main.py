@@ -21,33 +21,37 @@
 # app.include_router(vulnerabilities.router)
 
 
-from http.client import HTTPException
+# from http.client import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from dbapp.models import AutomotiveVulnerability
+from dbapp.models import AutomotiveVulnerability, User
 from dbapp.database import get_db
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from datetime import datetime
 from typing import Optional
+from passlib.context import CryptContext
+from pydantic import BaseModel
 
 app = FastAPI()
 
+
+# ----------------- CORS Setup -----------------
 origins = [
-    "http://127.0.0.1:5500",  # replace with your frontend URL/port
+    "http://127.0.0.1:5500",
     "http://localhost:5500",
-    "*",  # allow all origins for testing
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    # allow_origins=origins,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 @app.get("/")
 def read_root():
@@ -102,3 +106,51 @@ def get_vulnerability_by_cve(cve_id: str, db: Session = Depends(get_db)):
     if not vuln:
         raise HTTPException(status_code=404, detail="Not Found")
     return vuln
+
+#password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# ----------------- Pydantic Models -----------------
+class UserSignup(BaseModel):
+    name: str
+    username: str
+    email: str
+    password: str
+    confirm_password: str
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+# ----------------- SIGNUP -----------------
+@app.post("/signup")
+def signup(user: UserSignup, db: Session = Depends(get_db)):
+    if user.password != user.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+
+    existing_user = db.query(User).filter(
+        (User.username == user.username) | (User.email == user.email)
+    ).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    hashed_pw = pwd_context.hash(user.password)
+    new_user = User(
+        name=user.name,
+        username=user.username,
+        email=user.email,
+        password=hashed_pw
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"success": True, "message": "Signup successful. Please Login"}
+
+# ----------------- LOGIN -----------------
+@app.post("/login")
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == user.username).first()
+    if not db_user or not pwd_context.verify(user.password, db_user.password):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    return {"success": True, "message": "Login successful"}
