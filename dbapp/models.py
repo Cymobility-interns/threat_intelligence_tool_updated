@@ -83,7 +83,7 @@ class AutomotiveVulnerability(Base):
 
     
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, nullable=True)
