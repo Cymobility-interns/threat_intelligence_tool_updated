@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attack Ledger</title>
+
+  <!-- Bootstrap CSS -->
+   <link rel="icon" href="assets/images/favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/ledger.css">
+  <style>
+    /* Make navbar sticky */
+    #navbar-container {
+      position: sticky;
+      top: 0;
+      z-index: 1020; /* above content */
+    }
+  </style>
+</head>
+<body class="bg-custom text-light">
+
+  <!-- Navbar placeholder -->
+  <div id="navbar-container"></div>
+
+  <!-- Threat Stream Table -->
+    <div class="container my-4">
+      <h3 class="text-center mb-4"><b>Attack Ledger</b></h3>
+      <div class="table-responsive">
+        <table class="table table-dark align-middle table-fixed">
+          <thead>
+            <tr>
+              <th scope="col">Identifier</th>
+              <th scope="col">Attack Title</th>
+              <th scope="col">Published Date</th>
+            </tr>
+          </thead>
+          <tbody id="vuln-table-body">
+            <!-- Populated dynamically via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <!-- Pagination controls -->
+    <nav>
+      <ul id="pagination" class="pagination justify-content-center mb-4">
+        <!-- Populated dynamically -->
+      </ul>
+    </nav>
+
+    <div id="empty-state" class="text-center text-white" style="display:none;">
+      No vulnerabilities found.
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="assets/js/api.js"></script>
+  <script type="module" src="assets/js/main.js"></script>
+  <script type="module" src="assets/js/ledger.js"></script>
+</html>

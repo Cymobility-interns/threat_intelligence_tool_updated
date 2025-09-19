@@ -52,3 +52,9 @@ a {
   color: #00BDBD;
   text-decoration: none;
 }
+
+.toggle-password {
+  color: black;       /* always black */
+  font-size: 1.2rem;  /* slightly bigger */
+  cursor: pointer;    /* keep clickable */
+}
