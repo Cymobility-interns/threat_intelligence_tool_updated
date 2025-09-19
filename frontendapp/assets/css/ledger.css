@@ -1,0 +1,110 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Entire page background white */
+body.bg-custom {
+  background-color: #ffffff !important;
+  color: #000000;
+}
+
+/* Title */
+h3 {
+  color: #00003B !important;
+}
+
+/* Table header */
+.table thead th {
+  background-color: #00003B !important;
+  color: #AAEEEE !important;
+  border: none !important;
+}
+
+/* Table */
+.table {
+  border-collapse: collapse !important;
+  border: 2px solid #00003B !important; /* Only outer border */
+}
+
+.table td, .table th {
+  border: none !important; /* No internal borders */
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Fixed table layout to prevent column jumping */
+.table-fixed {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.table-fixed th,
+.table-fixed td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Specific column widths */
+.table-fixed th:nth-child(1),
+.table-fixed td:nth-child(1) {
+  width: 150px; /* Identifier */
+}
+
+.table-fixed th:nth-child(2),
+.table-fixed td:nth-child(2) {
+  width: 400px; /* Attack Title */
+}
+
+.table-fixed th:nth-child(3),
+.table-fixed td:nth-child(3) {
+  width: 150px; /* Published Date */
+}
+
+/* CVE links in black */
+a.cve-link {
+  color: #000000 !important;
+  text-decoration: none;
+}
+
+a.cve-link:hover {
+  text-decoration: underline;
+  color: #000000 !important; /* No hover effect */
+}
+
+/* Pagination (sticky at bottom) */
+#pagination {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#pagination .page-item .page-link {
+  color: #fff;
+  background-color: #00003B;
+  border: 1px solid #444;
+}
+
+#pagination .page-item.active .page-link {
+  background-color: #23364C;
+  border-color: #444;
+  color: #fff;
+}
+
+#pagination .page-item.disabled .page-link {
+  color: #6c757d;
+  background-color: #1A2C3E;
+  border-color: #495057;
+}
+
+#pagination .page-link:hover {
+  background-color: #495057;
+  color: #fff;
+}

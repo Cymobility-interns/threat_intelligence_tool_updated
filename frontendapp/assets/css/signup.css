@@ -1,0 +1,61 @@
+body {
+  background: url('../images/background.jpg') no-repeat center center fixed;
+  background-size: 100% 100%;
+  color: #FFFFFF;
+  font-family: Arial, sans-serif; 
+}
+
+
+/* .signup-container {
+  background: rgba(0, 0, 59, 0.7);
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 400px;
+  margin: 70px auto;
+  text-align: center;
+} */
+
+
+.signup-container {
+  background: rgba(0, 0, 59, 0.7);
+  padding: 40px 80px;                 
+  /* border-radius: 12px; */
+  max-width: 480px;               
+  min-height: 350px;              
+  margin: 50px auto;
+  text-align: center;
+}
+
+
+.logo {
+  width: 400px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+h2 {
+  color: #00BDBD;
+  font-weight: bold;
+}
+
+.form-control {
+  border-radius: 8px;
+}
+
+.btn-success {
+  font-weight: bold;
+  background-color: #00BDBD;
+  border: none;
+}
+
+a {
+  color: #00BDBD;
+  text-decoration: none;
+}
+
+.toggle-password {
+  color: black;       /* always black */
+  font-size: 1.2rem;  /* slightly bigger */
+  cursor: pointer;    /* keep clickable */
+}
+
