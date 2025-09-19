@@ -75,3 +75,10 @@ a {
   color: #00BDBD;
   text-decoration: none;
 }
+
+.toggle-password {
+  color: black;   /* Always visible in black */
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
