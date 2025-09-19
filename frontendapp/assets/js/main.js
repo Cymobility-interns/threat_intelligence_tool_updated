@@ -1,6 +1,6 @@
+
 import { fetchVulnerabilities, postData } from "./api.js";
 import { renderVulnerabilities } from "./ledger.js";
-
 
 console.log("Dashboard script loaded");
 
@@ -8,6 +8,7 @@ console.log("Dashboard script loaded");
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
   window.location.href = "login.html";
 });
+
 
 // Load navbar component
 async function loadNavbar() {
@@ -86,3 +87,4 @@ async function init() {
 }
 
 init();
+
