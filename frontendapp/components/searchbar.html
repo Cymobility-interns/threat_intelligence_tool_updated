@@ -1,0 +1,53 @@
+<form class="d-flex search-bar" role="search">
+  <div class="input-group">
+    <span class="input-group-text">
+      <i class="bi bi-search"></i>
+    </span>
+    <input
+      class="form-control"
+      type="search"
+      placeholder="Search"
+      id="search-input"
+      aria-label="Search"
+    >
+  </div>
+</form>
+
+<style>
+    
+  .search-bar {
+    flex: 0.6;
+    margin: 0 1rem;
+  }
+
+  /* .search-bar {
+  max-width: 350px; 
+  width: 100%; 
+  margin: 0 1rem;      
+} */
+
+  .search-bar .input-group-text {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-right: none;
+    color: #000;
+  }
+
+  .search-bar .form-control {
+    border: 1px solid #ccc;
+    border-left: none;
+    box-shadow: none;
+  }
+
+  .search-bar .form-control:focus {
+    border-color: #666;
+    box-shadow: none;
+  }
+
+.search-bar .input-group,
+.search-bar .form-control,
+.search-bar .input-group-text {
+  border-radius: 2px; 
+}
+
+</style>

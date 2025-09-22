@@ -1,14 +1,16 @@
+import { fetchVulnerabilities } from "./api.js";
 
 import { fetchVulnerabilities, postData } from "./api.js";
 import { renderVulnerabilities } from "./ledger.js";
 
 console.log("Dashboard script loaded");
 
-// Example: Logout function
+// Logout button (if present)
 document.getElementById("logoutBtn")?.addEventListener("click", () => {
   window.location.href = "login.html";
 });
 
+// Load navbar and inject search bar (ledger page only)
 
 // Load navbar component
 async function loadNavbar() {
@@ -17,71 +19,46 @@ async function loadNavbar() {
     const navbarHtml = await response.text();
     document.getElementById("navbar-container").innerHTML = navbarHtml;
 
-    // Attach all toolbar event listeners
-    setupNavbarControls();
-    setupCalendarIconClick();
+    if (window.location.pathname.includes("ledger.html")) {
+      const searchBarResponse = await fetch("components/searchbar.html");
+      const searchBarHtml = await searchBarResponse.text();
+
+      const navbar = document.querySelector("#navbar-container nav");
+      const menu = navbar?.querySelector(".dropdown");
+
+      if (navbar && menu) {
+        menu.insertAdjacentHTML("beforebegin", searchBarHtml);
+        setupLedgerSearch(); // wire after injection
+      }
+    }
   } catch (err) {
     console.error("Failed to load navbar:", err);
   }
 }
 
-// // Make calendar icons clickable to open native date picker
-// function setupCalendarIconClick() {
-//   document.querySelectorAll('.calendar-icon').forEach(icon => {
-//     icon.addEventListener('click', () => {
-//       const input = icon.closest('.input-group').querySelector('input[type="date"]');
-//       if (input.showPicker) input.showPicker(); // Chrome & modern browsers
-//       input.focus(); // fallback for older browsers
-//     });
-//   });
-// }
+// Attach search handler
+function setupLedgerSearch() {
+  const searchForm = document.querySelector(".search-bar");
+  const searchInput = document.getElementById("search-input");
 
-// // Toolbar functionality
-// function setupNavbarControls() {
-//   const refreshBtn = document.getElementById("refresh-btn");
-//   const fromDate = document.getElementById("from-date");
-//   const toDate = document.getElementById("to-date");
-//   const searchInput = document.getElementById("search-input");
+  if (!searchForm || !searchInput) return;
 
-//   // Refresh → reset filters
-//   refreshBtn?.addEventListener("click", async () => {
-//     fromDate.value = "";
-//     toDate.value = "";
-//     searchInput.value = "";
-//     const vulnerabilities = await fetchVulnerabilities();
-//     renderVulnerabilities(vulnerabilities);
-//   });
+  searchForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    if (!query) return;
 
-//   // Date pickers → fetch when both set
-//   [fromDate, toDate].forEach(el => {
-//     el?.addEventListener("change", async () => {
-//       if (fromDate.value && toDate.value) {
-//         const vulnerabilities = await fetchVulnerabilities({
-//           from: fromDate.value,
-//           to: toDate.value,
-//           search: searchInput.value.trim()
-//         });
-//         renderVulnerabilities(vulnerabilities);
-//       }
-//     });
-//   });
-
-//   // Search → fetch on Enter
-//   searchInput?.addEventListener("keyup", async (e) => {
-//     if (e.key === "Enter") {
-//       const vulnerabilities = await fetchVulnerabilities({
-//         from: fromDate.value,
-//         to: toDate.value,
-//         search: searchInput.value.trim()
-//       });
-//       renderVulnerabilities(vulnerabilities);
-//     }
-//   });
-// }
+    console.log("Search triggered with:", query);
+    const vulnerabilities = await fetchVulnerabilities({ search: query });
+    renderVulnerabilities(vulnerabilities);
+  });
+}
 
 // Initialize page
 async function init() {
   await loadNavbar();
+
+  // Load vulnerabilities initially
   const vulnerabilities = await fetchVulnerabilities();
   renderVulnerabilities(vulnerabilities);
 }

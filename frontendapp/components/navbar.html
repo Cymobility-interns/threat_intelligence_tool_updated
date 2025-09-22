@@ -12,7 +12,7 @@
         font-family: 'Poppins', sans-serif; 
     }
     .navbar-custom {
-      background-color: #04044b; /* dark blue background */
+      background-color: #00003B; /* dark blue background */
       padding: 0.5rem 2rem;      /* space left & right */
     }
     .navbar-brand img {
@@ -41,6 +41,12 @@
     <a class="navbar-brand text-white fw-bold" href="#">
       <img src="assets/images/logo.png" alt="Logo"> 
     </a>
+
+    <!-- Search bar (right aligned) -->
+    <div class="search-container flex-grow-1 d-flex justify-content-center">
+      <!-- The search bar will be injected here dynamically -->
+      <div id="search-wrapper"></div>
+    </div>
 
     <!-- Menu on right -->
     <div class="dropdown me-4"> <!-- 'me-4' moves it a bit left from edge -->
