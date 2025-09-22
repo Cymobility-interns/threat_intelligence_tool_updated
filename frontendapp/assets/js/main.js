@@ -1,4 +1,6 @@
 import { fetchVulnerabilities } from "./api.js";
+
+import { fetchVulnerabilities, postData } from "./api.js";
 import { renderVulnerabilities } from "./ledger.js";
 
 console.log("Dashboard script loaded");
@@ -9,6 +11,8 @@ document.getElementById("logoutBtn")?.addEventListener("click", () => {
 });
 
 // Load navbar and inject search bar (ledger page only)
+
+// Load navbar component
 async function loadNavbar() {
   try {
     const response = await fetch("components/navbar.html");
@@ -60,3 +64,4 @@ async function init() {
 }
 
 init();
+
