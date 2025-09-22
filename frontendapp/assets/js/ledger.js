@@ -1,6 +1,5 @@
-// ui.js
 let currentPage = 1;
-const entriesPerPage = 11;
+const entriesPerPage = 12;
 let vulnerabilitiesData = [];
 
 // Helper: format ISO date (or other parseable date) to DD-MM-YYYY
