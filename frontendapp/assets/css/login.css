@@ -23,7 +23,7 @@
 
 
 body {
-  background: url('../images/background.jpg') no-repeat center center fixed;
+  background: url('../images/cycar.jpg') no-repeat center center fixed;
   background-size: contain;
   background-size: 100% 100%;
   color: #FFFFFF;
@@ -81,4 +81,3 @@ a {
   font-size: 1.2rem;
   cursor: pointer;
 }
-
