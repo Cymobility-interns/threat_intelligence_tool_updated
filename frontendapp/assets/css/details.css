@@ -1,0 +1,51 @@
+body {
+    background-color: #00003b;  /* page dark background */
+    color: #FFFFFF;             /* default text outside container */
+    background-image: url('../images/branddarker.jpg');
+     background-position: center;    /* center the image */
+    background-repeat: no-repeat;   /* prevent repeating */
+    background-size: cover;       /* cover the entire background */
+}
+
+/* Details container styling */
+#details-container {
+  background-color: #ffffff;   /* white background */
+  color: #000000;              /* black text */
+  border: 1px solid #000;      /* black outline */
+  border-radius: 8px;
+  max-width: 100%;             /* full width of container */
+  width: 95%;                  /* broader width */
+  margin:auto;                /* center horizontally */
+}
+
+/* Title inside details */
+#details-container h5 {
+  text-align: left;            /* align title to top/left */
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #000000;              /* black text */
+}
+
+/* Definition list styling */
+#details-container dl {
+  margin: 0;
+  padding: 0;
+}
+
+#details-container dt,
+#details-container dd {
+  display: table-cell;
+  padding: 10px;
+  vertical-align: top;
+}
+
+#details-container dt {
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+#details-container dl > dt:last-of-type,
+#details-container dl > dd:last-of-type {
+  border-bottom: none;
+}
+

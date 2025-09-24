@@ -3,23 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brand Vulnerability - Enhanced Carousel</title>
+  <title>Brand Vulnerability</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/brand.css">
   <style>
-
-    html, body {
-    margin: 0;
-    padding: 0;
-  }
-  
     /* Make navbar sticky */
     #navbar {
-      position: sticky;
+      position: fixed;
       top: 0;
+      width: 100%;
       z-index: 1020; /* above content */
     }
-   
+    
   </style>
 </head>
 <body>
@@ -49,13 +44,13 @@
         <!-- Rotating brand orbit -->
         <div class="brand-orbit" id="brand-orbit">
           <div class="brand-logo" data-brand="audi">
-            <img src="assets/images/Audi.png" alt="Audi">
+            <img src="assets/images/audi.png" alt="Audi">
           </div>
           <div class="brand-logo" data-brand="bmw">
             <img src="assets/images/bmw.png" alt="BMW">
           </div>
           <div class="brand-logo" data-brand="tesla">
-            <img src="assets/images/Tesla.png" alt="Tesla">
+            <img src="assets/images/tesla.png" alt="Tesla">
           </div>
           <div class="brand-logo" data-brand="ford">
             <img src="assets/images/ford.png" alt="Ford">
@@ -64,28 +59,28 @@
             <img src="assets/images/toyota.png" alt="Toyota">
           </div>
           <div class="brand-logo" data-brand="honda">
-            <img src="assets/images/Hondalogo.png" alt="Honda">
+            <img src="assets/images/hondalogo.png" alt="Honda">
           </div>
           <div class="brand-logo" data-brand="nissan">
-            <img src="assets/images/Nissan.png" alt="Nissan">
+            <img src="assets/images/nissan.png" alt="Nissan">
           </div>
           <div class="brand-logo" data-brand="volkswagen">
-            <img src="assets/images/Volkswagen.png" alt="Volkswagen">
+            <img src="assets/images/volkswagen.png" alt="Volkswagen">
           </div>
           <div class="brand-logo" data-brand="chevrolet">
-            <img src="assets/images/Chevrolet.png" alt="Chevrolet">
+            <img src="assets/images/chevrolet.png" alt="Chevrolet">
           </div>
           <div class="brand-logo" data-brand="hyundai">
             <img src="assets/images/hyundai.png" alt="Hyundai">
           </div>
           <div class="brand-logo" data-brand="kia">
-            <img src="assets/images/kia logo.png" alt="Kia">
+            <img src="assets/images/kia.png" alt="Kia">
           </div>
           <div class="brand-logo" data-brand="jeep">
-            <img src="assets/images/Jeep.png" alt="Jeep">
+            <img src="assets/images/jeep.png" alt="Jeep">
           </div>
           <div class="brand-logo" data-brand="mahindra">
-            <img src="assets/images/Mahindra.png" alt="Mahindra">
+            <img src="assets/images/mahindra.png" alt="Mahindra">
           </div>
           <div class="brand-logo" data-brand="skoda">
             <img src="assets/images/skoda.png" alt="Skoda">
@@ -94,15 +89,15 @@
             <img src="assets/images/suzuki.png" alt="Suzuki">
           </div>
           <div class="brand-logo" data-brand="renault">
-            <img src="assets/images/Renault.png" alt="Renault">
+            <img src="assets/images/renault.png" alt="Renault">
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  
   <script src="assets/js/brand.js"></script>
+
   <!-- Navbar Fetch -->
   <script>
     fetch("components/navbar.html")
