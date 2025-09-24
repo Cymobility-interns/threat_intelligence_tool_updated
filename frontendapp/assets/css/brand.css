@@ -1,17 +1,25 @@
- body {
+body {
       font-family: 'Roboto', sans-serif;
       background: #f8f9fa;
       min-height: 100vh;
       margin: 0;
       padding: 20px 0;
+      background-image: url('../images/branddarker.jpg');
+      background-size: cover;
+      display: flex;
+      flex-direction: column;
     }
 
     .container {
       display: flex;
-      flex-direction: column;
+      /* flex-direction: column; */
       align-items: center;
       justify-content: center;
-      min-height: 80vh;
+      /* min-height: 80vh;
+      margin-top: 30px; */
+      flex: 1;
+      padding: 40px 0;
+      margin: 0;
     }
 
     h2 {
@@ -30,14 +38,14 @@
       align-items: center;
       justify-content: center;
       margin: 0 auto;
-      background-color: #00003b;
+      /* background-color: #00003b; */
       
     }
 
     .center-car {
       position: absolute;
-      width: 300px;
-      height: 300px;
+      width: 450px;
+      height: 450px;
       border-radius: 50%;
       background: white;
       display: flex;
@@ -50,8 +58,8 @@
     }
 
     .center-car img {
-      width: 300px;
-      height: 300px;
+      width: 450px;
+      height: 450px;
       object-fit: cover;
       border-radius: 50%;
     }
@@ -87,7 +95,7 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 30px rgba(151, 134, 134, 0.2);
       backdrop-filter: blur(10px);
       border: 2px solid rgba(255,255,255,0.3);
       animation: counterRotate 20s linear infinite;
@@ -146,7 +154,7 @@
 
     /* White container background */
     .glass-container {
-      background: #00003b;
+      /* background: #00003b; */
       backdrop-filter: none;
       border-radius: 0px;
       padding: 40px;
