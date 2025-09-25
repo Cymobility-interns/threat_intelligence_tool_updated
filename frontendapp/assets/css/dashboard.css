@@ -1,0 +1,201 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #00003b;
+  color: #ffffff;
+  background-image: url('../images/branddarker.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+html, body {
+  overflow: hidden;
+}
+
+/* Navbar */
+.navbar-custom {
+  background-color: #00003B;
+  padding: 0.5rem 1rem;
+}
+
+.nav-link {
+  color: white !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s;
+  margin: 0 0.3rem;
+}
+
+.nav-link:hover {
+  background-color: #55dddd;
+}
+
+/* User icon */
+.user-icon {
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+.logout-btn {
+  position: absolute;
+  top: 40px; 
+  right: 0;
+  display: none;
+  z-index: 1000;
+}
+
+/* Flex layout for chart + recent attacks */
+.dashboard-content {
+  display: flex;
+  gap: 50px;
+  align-items: flex-start;
+  margin: 50px 80px;
+}
+
+/* Pie chart section */
+#chart-section {
+  flex: 1;
+  max-width: 500px;
+  width: 100%;
+  margin-top: 0px !important;
+  padding-top: 0px !important;
+  
+}
+
+/* Recent attacks section */
+#recent-attacks {
+  flex: 1;
+}
+
+#recent-attacks h3 {
+  margin-bottom: 15px;
+  font-weight: bold;
+  margin-left: 280px;
+  margin-top: 15px;
+  
+}
+
+#attack-list {
+  list-style: none;
+  padding: 0;
+}
+
+#attack-list li {
+  margin-bottom: 10px;
+  background-color: #ffffff;
+  color:#00003b;
+  padding: 10px;
+  width: 600px !important;
+  border-radius: 5px;
+  margin-left: 80px;
+  font-weight: bold; /* bold attack titles */
+}
+
+#left-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; 
+   margin-top: 0 !important;
+}
+
+/* Brand Vulnerabilities Button */
+#next {
+  background-color: #55dddd;
+  color: #00003b;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: large;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 800px;
+  margin-top: -25px !important;
+}
+#click {
+  background-color: #00003b;
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+#click a {
+  color: #ffffff;
+  text-decoration: none;
+}
+#chart-section {
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  top: -70px;
+  /* margin-top: 0px !important; */
+}
+
+#more {
+  background-color: #55dddd;
+  color: #00003b;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 18px;
+  margin-left: 280px;
+  width: 200px;
+  margin-right: 300px;
+  margin-bottom: 10px !important;
+  margin-top: -10px !important;
+}
+
+#more a {
+  color: #00003b;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+
+#interfaceChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Make entire table match dark navy background */
+#attack-list table {
+  background-color: #0a0f1a; /* dark navy */
+  color: #ffffff;           /* white text */
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Table header */
+#attack-list th {
+  background-color: #0a0f1a;
+  color: #ffffff;
+  border: 1px solid #555; /* grey border */
+  padding: 8px;
+  text-align: left;
+}
+
+/* Table rows */
+#attack-list td {
+  border: 1px solid #555; /* grey row border */
+  padding: 12px !important;          /* increase height */
+  color: #ffffff;
+  background-color: #0a0f1a;
+}
+
+/* Hover effect (optional) */
+#attack-list tr:hover td {
+  background-color: #1a1f2e; /* lighter navy on hover */
+}
+
+#linechart-section {
+  position: relative;
+  top: -50px;
+}

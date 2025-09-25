@@ -4,4 +4,9 @@
       margin: 10px auto;
     }
 
+    body{
+      background-image: url('../images/branddarker.jpg');
+      background-position: center;
+      background-repeat: no-repeat;
+    }
     
