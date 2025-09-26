@@ -1,4 +1,8 @@
+
+// const API_BASE = "http://192.168.0.21:8000";
+// =======
 export const API_BASE = "http://127.0.0.1:8000";
+
 
 export async function fetchVulnerabilities({ from, to, search } = {}) {
   try {
@@ -49,3 +53,4 @@ export async function postData(endpoint, data) {
     return { ok: false, result: { detail: "Cannot connect to server. Please check your network." } };
   }
 }
+

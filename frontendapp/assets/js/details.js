@@ -7,8 +7,8 @@ const cveParam = params.get("cve");
 async function fetchDetails(cve) {
   if (!cve) return null;
   let url = cve.startsWith("internal-")
-    ? `http://192.168.0.15:8000/automotive_vulnerabilities/id/${cve.replace("internal-", "")}`
-    : `http://192.168.0.15:8000/automotive_vulnerabilities/cve/${cve}`;
+    ? `http://192.168.0.21:8000/automotive_vulnerabilities/id/${cve.replace("internal-", "")}`
+    : `http://192.168.0.218000/automotive_vulnerabilities/cve/${cve}`;
 
   try {
     const response = await fetch(url);
