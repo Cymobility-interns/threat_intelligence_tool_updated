@@ -1,3 +1,13 @@
+import { API_BASE } from "./api.js";
+
+async function protectPage() {
+  const response = await fetch(`${API_BASE}/me`, { credentials: "include" });
+  if (!response.ok) {
+    window.location.href = `login.html?next=${window.location.pathname.split("/").pop()}`;
+  }
+}
+document.addEventListener("DOMContentLoaded", protectPage);
+ 
  const orbit = document.getElementById('brand-orbit');
     const logos = document.querySelectorAll('.brand-logo');
     const carouselContainer = document.getElementById('carousel-container');

@@ -1,5 +1,8 @@
 body {
   font-family: 'Segoe UI', sans-serif;
+  background: url("../images/branddarker.jpg") no-repeat center center fixed;
+  background-size: contain;
+  background-size: 100% 100%;
 }
 
 /* Entire page background white */
@@ -10,8 +13,16 @@ body.bg-custom {
 
 /* Title */
 h3 {
-  color: #00003B !important;
+  color: #FFFF !important;
 }
+
+
+/* Table */
+.table {
+  border-collapse: collapse !important;
+  border: 2px solid #AAEEEE !important; 
+}
+
 
 /* Table header */
 .table thead th {
@@ -20,19 +31,15 @@ h3 {
   border: none !important;
 }
 
-/* Table */
-.table {
-  border-collapse: collapse !important;
-  border: 2px solid #00003B !important; /* Only outer border */
-}
 
 .table td, .table th {
-  border: none !important; /* No internal borders */
+  border: none !important; 
   background-color: #ffffff !important;
-  color: #000000 !important;
+  color: #000 !important;
   text-align: left;
   vertical-align: middle;
 }
+
 
 /* Fixed table layout to prevent column jumping */
 .table-fixed {
@@ -65,13 +72,13 @@ h3 {
 
 /* CVE links in black */
 a.cve-link {
-  color: #000000 !important;
+  color: #000 !important;
   text-decoration: none;
 }
 
 a.cve-link:hover {
   text-decoration: underline;
-  color: #000000 !important; /* No hover effect */
+  color: #000 !important; /* No hover effect */
 }
 
 /* Pagination (sticky at bottom) */
@@ -89,19 +96,19 @@ a.cve-link:hover {
 #pagination .page-item .page-link {
   color: #fff;
   background-color: #00003B;
-  border: 1px solid #444;
+  border: 1px solid #AAEEEE;
 }
 
 #pagination .page-item.active .page-link {
   background-color: #23364C;
-  border-color: #444;
+  border-color: #fff;
   color: #fff;
 }
 
 #pagination .page-item.disabled .page-link {
   color: #6c757d;
   background-color: #1A2C3E;
-  border-color: #495057;
+  /* border-color: #495057; */
 }
 
 #pagination .page-link:hover {

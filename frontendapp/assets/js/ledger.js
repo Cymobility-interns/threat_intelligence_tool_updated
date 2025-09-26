@@ -1,5 +1,17 @@
+
+import { API_BASE } from "./api.js";
+
+async function protectPage() {
+  const response = await fetch(`${API_BASE}/me`, { credentials: "include" });
+  if (!response.ok) {
+    window.location.href = `login.html?next=${window.location.pathname.split("/").pop()}`;
+  }
+}
+document.addEventListener("DOMContentLoaded", protectPage);
+
+
 let currentPage = 1;
-const entriesPerPage = 12;
+const entriesPerPage = 11;
 let vulnerabilitiesData = [];
 
 // -----------------------------

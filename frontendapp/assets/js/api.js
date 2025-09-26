@@ -1,4 +1,8 @@
-const API_BASE = "http://192.168.0.21:8000";
+
+// const API_BASE = "http://192.168.0.21:8000";
+// =======
+export const API_BASE = "http://127.0.0.1:8000";
+
 
 export async function fetchVulnerabilities({ from, to, search } = {}) {
   try {
@@ -30,6 +34,7 @@ export async function postData(endpoint, data) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
+      credentials: "include", // ✅ important for session cookies
     });
 
     let result;

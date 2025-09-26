@@ -15,7 +15,7 @@
     #navbar-container {
       position: sticky;
       top: 0;
-      z-index: 1020; /* above content */
+      z-index: 1020;
     }
   </style>
 </head>
@@ -25,36 +25,34 @@
   <div id="navbar-container"></div>
 
   <!-- Threat Stream Table -->
-    <div class="container-fluid my-4 px-3">
-      <h3 class="text-center"><b>Attack Ledger</b></h3>
-      <div class="table-responsive">
-        <table class="table table-dark align-middle table-fixed">
-          <thead>
-            <tr>
-              <th scope="col">Identifier</th>
-              <th scope="col">Attack Title</th>
-              <th scope="col">Published Date</th>
-            </tr>
-          </thead>
-          <tbody id="vuln-table-body">
-            <!-- Populated dynamically via JS -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-
-    <!-- Pagination controls -->
-    <nav>
-      <ul id="pagination" class="pagination justify-content-center">
-        <!-- Populated dynamically -->
-      </ul>
-    </nav>
-
-    <div id="empty-state" class="text-center text-dark" style="display:none;">
-      No vulnerabilities found.
+  <div class="container-fluid my-4 px-3">
+    <h3 class="text-center mb-4"><b>Attack Ledger</b></h3>
+    <div class="table-responsive">
+      <table class="table table-dark align-middle table-fixed">
+        <thead>
+          <tr>
+            <th scope="col">Identifier</th>
+            <th scope="col">Attack Title</th>
+            <th scope="col">Published Date</th>
+          </tr>
+        </thead>
+        <tbody id="vuln-table-body">
+          <!-- Populated dynamically via JS -->
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <!-- Pagination controls -->
+  <nav>
+    <ul id="pagination" class="pagination justify-content-center"></ul>
+  </nav>
+
+  <div id="empty-state" class="text-center" style="display:none;">
+    No vulnerabilities found.
+  </div>
+
+
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
