@@ -1,6 +1,5 @@
 import { fetchVulnerabilities } from "./api.js";
 
-import { fetchVulnerabilities, postData } from "./api.js";
 import { renderVulnerabilities } from "./ledger.js";
 
 console.log("Dashboard script loaded");
