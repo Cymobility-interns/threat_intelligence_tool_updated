@@ -20,17 +20,36 @@
     }
     .menu-toggle {
       color: white;
-      font-size: 1.1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
       font-size: 1.4rem;   /* bigger text */
       font-weight: 600;    /* bold text */
       cursor: pointer;
+      display: flex;
+      align-items: center;
     }
     .menu-toggle i {
       margin-right: 6px; /* space between icon & text */
       font-size: 1.6rem;
+    }
+
+    /* Dropdown customization */
+    .dropdown-menu {
+      background-color: #AFFBF7 !important;  /* dropdown background */
+      border: none;              
+      border-radius: 0.5rem;    
+      min-width: 150px;  
+      margin-top: 1rem !important;  
+      box-shadow: none !important;    
+      margin-right: -30px;
+    }
+    .dropdown-item {
+      color: #00003B !important;   
+      font-weight: 500;
+    }
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+      background-color: transparent !important; /* disable hover effect */
+      color: #00003B !important;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -54,10 +73,10 @@
         <i class="bi bi-list"></i> Menu
       </div>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="home.html">Home</a></li>
-        <li><a class="dropdown-item" href="about.html">About</a></li>
-        <li><a class="dropdown-item" href="services.html">Services</a></li>
-        <li><a class="dropdown-item" href="contact.html">Contact</a></li>
+        <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
+        <li><a class="dropdown-item" href="ledger.html">Attack Ledger</a></li>
+        <li><a class="dropdown-item" href="brand.html">Brands</a></li>
+        <!-- <li><a class="dropdown-item" href="contact.html">Contact</a></li> -->
       </ul>
     </div>
   </nav>

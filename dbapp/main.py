@@ -26,15 +26,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from dbapp.models import AutomotiveVulnerability, User
 from dbapp.database import get_db
-from fastapi import FastAPI, Depends, Query, HTTPException
+from fastapi import FastAPI, Depends, Query, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from datetime import datetime
 from typing import Optional
 from passlib.context import CryptContext
 from pydantic import BaseModel
+from starlette.middleware.sessions import SessionMiddleware
+
 
 app = FastAPI()
+
+app.add_middleware(SessionMiddleware, secret_key="super-secret-key")  # use env var in prod
 
 
 # ----------------- CORS Setup -----------------
@@ -107,6 +111,13 @@ def get_vulnerability_by_cve(cve_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Not Found")
     return vuln
 
+@app.get("/automotive_vulnerabilities/id/{id}")
+def get_vulnerability_by_id(id: int, db: Session = Depends(get_db)):
+    vuln = db.query(AutomotiveVulnerability).get(id)
+    if not vuln:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return vuln
+
 #password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -147,10 +158,41 @@ def signup(user: UserSignup, db: Session = Depends(get_db)):
     return {"success": True, "message": "Signup successful. Please Login"}
 
 # ----------------- LOGIN -----------------
+# @app.post("/login")
+# def login(user: UserLogin, db: Session = Depends(get_db)):
+#     db_user = db.query(User).filter(User.username == user.username).first()
+#     if not db_user or not pwd_context.verify(user.password, db_user.password):
+#         raise HTTPException(status_code=400, detail="Invalid credentials")
+
+#     return {"success": True, "message": "Login successful"}
+
 @app.post("/login")
-def login(user: UserLogin, db: Session = Depends(get_db)):
+def login(user: UserLogin, request: Request, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if not db_user or not pwd_context.verify(user.password, db_user.password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
 
-    return {"success": True, "message": "Login successful"}
+    # Store user info in session
+    request.session["user"] = {"id": db_user.id, "username": db_user.username, "name": db_user.name}
+
+    return {"success": True, "message": "Login successful", "username": db_user.username, "name": db_user.name}
+
+
+# ----------------- LOGOUT -----------------
+@app.post("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return {"success": True, "message": "Logged out"}
+
+
+# ----------------- GET CURRENT USER -----------------
+@app.get("/me")
+def get_current_user(request: Request):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Not logged in")
+    return {
+        "username": user["username"],
+        "name": user["name"]
+        }
+
