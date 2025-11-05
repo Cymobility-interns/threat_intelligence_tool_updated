@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     DATABASE_URL: str 
 
-    openai_api_key: str  
+    # openai_api_key: str  
 
     NVD_API_KEY: str | None = None
 

@@ -1,13 +1,3 @@
-import { API_BASE } from "./api.js";
-
-// async function protectPage() {
-//   const response = await fetch(`${API_BASE}/me`, { credentials: "include" });
-//   if (!response.ok) {
-//     window.location.href = `login.html?next=${window.location.pathname.split("/").pop()}`;
-//   }
-// }
-// document.addEventListener("DOMContentLoaded", protectPage);
- 
  const orbit = document.getElementById('brand-orbit');
     const logos = document.querySelectorAll('.brand-logo');
     const carouselContainer = document.getElementById('carousel-container');
@@ -89,15 +79,15 @@ import { API_BASE } from "./api.js";
         resumeCarousel();
       });
 
-      // Navigate to brand details on click
+      // Navigate to brand details on click (from tier1.html)
       logo.addEventListener('click', (e) => {
         e.preventDefault();
         const brandName = logo.getAttribute('data-brand');
 
-        //Remember that this branddetails page came from brand.html
-        sessionStorage.setItem('branddetailsSource', 'brand');
+        //Mark that this branddetails page came from tier1.html
+        sessionStorage.setItem('branddetailsSource', 'tier1');
 
-        //Go to branddetails.html with selected brand
+        //Go to branddetails.html
         window.location.href = `branddetails.html?brand=${encodeURIComponent(brandName)}`;
       });
 

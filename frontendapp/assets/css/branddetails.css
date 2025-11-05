@@ -5,8 +5,42 @@
     }
 
     body{
-      background-image: url('../images/branddarker.jpg');
+      background-image: url('../images/brandbg.jpg');
       background-position: center;
       background-repeat: no-repeat;
+      font-family: Verdana, Geneva, Tahoma, sans-serif !important;
     }
-    
+
+    /* Download button styling */
+    #download-selected {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #55dddd;
+      transition: all 0.25s ease-in-out;
+      color: #00003B;
+      background-color: #55dddd;
+      margin-right: 18px;
+    }
+
+    #download-selected i {
+      font-size: 1.3rem;
+    }
+
+    /* #download-selected:hover {
+      background-color: #55dddd;
+      color: black;
+    } */
+
+    /* Checkbox styling for better visibility */
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    .table th:nth-child(4),
+    .table td:nth-child(4) {
+      text-align: center !important;
+    }

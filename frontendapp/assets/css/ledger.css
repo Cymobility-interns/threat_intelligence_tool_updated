@@ -1,8 +1,13 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: url("../images/branddarker.jpg") no-repeat center center fixed;
-  background-size: contain;
-  background-size: 100% 100%;
+  font-family: verdana, geneva, tahoma, sans-serif !important;
+  background: url("../images/brandbg.jpg") no-repeat center center fixed;
+  /* background-size: contain;
+  background-size: 100% 100%; */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 100vh;
+  overflow: hidden;
 }
 
 /* Entire page background white */
@@ -20,9 +25,10 @@ h3 {
 /* Table */
 .table {
   border-collapse: collapse !important;
-  border: 2px solid #AAEEEE !important; 
+  width: 100%;
+  border: 2px solid #AAEEEE !important;
+  background-color: transparent !important; /* make entire table transparent */
 }
-
 
 /* Table header */
 .table thead th {
@@ -31,15 +37,15 @@ h3 {
   border: none !important;
 }
 
-
-.table td, .table th {
-  border: none !important; 
-  background-color: #ffffff !important;
-  color: #000 !important;
+/* Table cells */
+.table td,
+.table th {
+  background-color: transparent !important; /* transparent rows */
+  color: #ffffff !important;
   text-align: left;
   vertical-align: middle;
+  border-bottom: 1px solid rgba(170, 238, 238, 0.4) !important; /* subtle horizontal line */
 }
-
 
 /* Fixed table layout to prevent column jumping */
 .table-fixed {
@@ -68,17 +74,23 @@ h3 {
 .table-fixed th:nth-child(3),
 .table-fixed td:nth-child(3) {
   width: 150px; /* Published Date */
+  text-align: center;
+}
+
+.table tr:hover {
+  background: rgba(85, 221, 221, 0.1);
+  transition: background 0.3s;
 }
 
 /* CVE links in black */
 a.cve-link {
-  color: #000 !important;
+  color: #55dddd;
   text-decoration: none;
 }
 
 a.cve-link:hover {
+  color: #4FFAEE !important;
   text-decoration: underline;
-  color: #000 !important; /* No hover effect */
 }
 
 /* Pagination (sticky at bottom) */
@@ -90,7 +102,6 @@ a.cve-link:hover {
   padding: 0.5rem 0;
   display: flex;
   justify-content: center;
-  z-index: 1000;
 }
 
 #pagination .page-item .page-link {
@@ -115,3 +126,49 @@ a.cve-link:hover {
   background-color: #495057;
   color: #fff;
 }
+
+.filter-sidebar {
+  background-color: #00003B;
+  position: fixed;
+  top: 0;
+  left: -320px;
+  width: 300px;
+  height: 100%;
+  overflow-y: auto;
+  transition: left 0.3s ease;
+  z-index: 1050;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.6);
+}
+.filter-sidebar.open {
+  left: 0;
+}
+
+button.btn.rounded-circle:hover {
+  background-color: #55dddd;
+}
+
+#ledger-search-btn:hover {
+  background-color: black;
+  color: white;
+}
+
+#filter-sidebar .form-label {
+  color: #AAEEEE;
+}
+
+/* Background dim overlay when sidebar is open */
+#filter-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 998;
+}
+
+#filter-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+

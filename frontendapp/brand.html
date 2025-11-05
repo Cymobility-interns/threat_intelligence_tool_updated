@@ -1,30 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Brand Vulnerability</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/brand.css">
+
+  <!-- Bootstrap & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="assets/css/brand.css" />
+
   <style>
-    /* Make navbar fixed */
+    /* Navbar fixed at top */
     #navbar {
       position: fixed;
       top: 0;
       width: 100%;
-      z-index: 1020; /* above content */
+      z-index: 1020;
     }
-    
+
+    /* Back button styling */
+    .back-btn {
+      position: fixed;
+      left: 15px;
+      top: 85px; /* Adjust this to match your navbar height + margin */
+      width: 42px;
+      height: 42px;
+      color: white;
+      border: 2px solid #55dddd;
+      border-radius: 50%;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1100;
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.25s ease-in-out;
+    }
+
+    .back-btn i {
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+
+    .back-btn:hover {
+      background-color: #55dddd;
+      color: black;
+    }
+
   </style>
 </head>
+
 <body>
   <!-- Navbar -->
   <div id="navbar"></div>
 
+  <!-- Back Button -->
+  <button class="back-btn" id="backButton" onclick="window.location.href='company.html'">
+    <i class="bi bi-arrow-left"></i>
+  </button>
+
+  <!-- Main Container -->
   <div class="container">
-    <!-- <h2>Brand Vulnerabilities</h2> -->
-    
     <div class="glass-container">
       <!-- Floating particles -->
       <div class="particle"></div>
@@ -32,82 +72,55 @@
       <div class="particle"></div>
       <div class="particle"></div>
       <div class="particle"></div>
-      
+
+      <!-- Carousel -->
       <div class="carousel-container" id="carousel-container">
-        <!-- Pause indicator -->
-        <!-- <div class="pause-overlay"></div>
-         -->
-        <!-- Center car -->
+        <!-- Center Car -->
         <div class="center-car">
           <img src="assets/images/car.png" alt="Car">
         </div>
 
-        <!-- Rotating brand orbit -->
+        <!-- Rotating Brand Orbit -->
         <div class="brand-orbit" id="brand-orbit">
-          <div class="brand-logo" data-brand="audi">
-            <img src="assets/images/audi.png" alt="Audi">
-          </div>
-          <div class="brand-logo" data-brand="bmw">
-            <img src="assets/images/bmw.png" alt="BMW">
-          </div>
-          <div class="brand-logo" data-brand="tesla">
-            <img src="assets/images/tesla.png" alt="Tesla">
-          </div>
-          <div class="brand-logo" data-brand="ford">
-            <img src="assets/images/ford.png" alt="Ford">
-          </div>
-          <div class="brand-logo" data-brand="toyota">
-            <img src="assets/images/toyota.png" alt="Toyota">
-          </div>
-          <div class="brand-logo" data-brand="honda">
-            <img src="assets/images/hondalogo.png" alt="Honda">
-          </div>
-          <div class="brand-logo" data-brand="nissan">
-            <img src="assets/images/nissan.png" alt="Nissan">
-          </div>
-          <div class="brand-logo" data-brand="volkswagen">
-            <img src="assets/images/volkswagen.png" alt="Volkswagen">
-          </div>
-          <div class="brand-logo" data-brand="chevrolet">
-            <img src="assets/images/chevrolet.png" alt="Chevrolet">
-          </div>
-          <div class="brand-logo" data-brand="hyundai">
-            <img src="assets/images/hyundai.png" alt="Hyundai">
-          </div>
-          <div class="brand-logo" data-brand="kia">
-            <img src="assets/images/kia.png" alt="Kia">
-          </div>
-          <div class="brand-logo" data-brand="jeep">
-            <img src="assets/images/jeep.png" alt="Jeep">
-          </div>
-          <div class="brand-logo" data-brand="mahindra">
-            <img src="assets/images/mahindra.png" alt="Mahindra">
-          </div>
-          <div class="brand-logo" data-brand="skoda">
-            <img src="assets/images/skoda.png" alt="Skoda">
-          </div>
-          <div class="brand-logo" data-brand="suzuki">
-            <img src="assets/images/suzuki.png" alt="Suzuki">
-          </div>
-          <div class="brand-logo" data-brand="renault">
-            <img src="assets/images/renault.png" alt="Renault">
-          </div>
+          <div class="brand-logo" data-brand="audi"><img src="assets/images/audi.png" alt="Audi"></div>
+          <div class="brand-logo" data-brand="bmw"><img src="assets/images/bmw.png" alt="BMW"></div>
+          <div class="brand-logo" data-brand="tesla"><img src="assets/images/tesla.png" alt="Tesla"></div>
+          <div class="brand-logo" data-brand="ford"><img src="assets/images/ford.png" alt="Ford"></div>
+          <div class="brand-logo" data-brand="toyota"><img src="assets/images/toyota.png" alt="Toyota"></div>
+          <div class="brand-logo" data-brand="honda"><img src="assets/images/hondalogo.png" alt="Honda"></div>
+          <div class="brand-logo" data-brand="nissan"><img src="assets/images/nissan.png" alt="Nissan"></div>
+          <div class="brand-logo" data-brand="volkswagen"><img src="assets/images/volkswagen.png" alt="Volkswagen"></div>
+          <div class="brand-logo" data-brand="chevrolet"><img src="assets/images/chevrolet.png" alt="Chevrolet"></div>
+          <div class="brand-logo" data-brand="hyundai"><img src="assets/images/hyundai.png" alt="Hyundai"></div>
+          <div class="brand-logo" data-brand="kia"><img src="assets/images/kia.png" alt="Kia"></div>
+          <div class="brand-logo" data-brand="jeep"><img src="assets/images/jeep.png" alt="Jeep"></div>
+          <div class="brand-logo" data-brand="mahindra"><img src="assets/images/mahindra.png" alt="Mahindra"></div>
+          <div class="brand-logo" data-brand="skoda"><img src="assets/images/skoda.png" alt="Skoda"></div>
+          <div class="brand-logo" data-brand="suzuki"><img src="assets/images/suzuki.png" alt="Suzuki"></div>
+          <div class="brand-logo" data-brand="renault"><img src="assets/images/renault.png" alt="Renault"></div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Scripts -->
   <script type="module" src="assets/js/brand.js"></script>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Navbar Fetch -->
+  <!-- load navbar helper script normally (must be available before calling initNavbar) -->
+  <script src="components/navbar.js"></script>
+
   <script>
-    fetch("components/navbar.html")
-      .then(res => res.text())
-      .then(data => {
-        document.getElementById("navbar").innerHTML = data;
-      });
+    fetch("components/navbar.html", { cache: 'no-store' })
+      .then(res => res.ok ? res.text() : Promise.reject(res.status))
+      .then(html => {
+        document.getElementById("navbar").innerHTML = html;
+        // NOW call the initializer defined in navbar.js
+        if (typeof window.initNavbar === 'function') window.initNavbar();
+        else console.warn('initNavbar not found — ensure components/navbar.js is loaded.');
+      })
+      .catch(err => console.error('Failed to load navbar:', err));
   </script>
+  
 </body>
 </html>

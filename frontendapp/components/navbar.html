@@ -1,86 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Navbar Example</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<!-- components/navbar.html -->
+<nav class="navbar navbar-custom d-flex justify-content-between align-items-center position-relative">
+  <a class="navbar-brand text-white fw-bold" href="#">
+    <img src="assets/images/logo.png" alt="Logo" style="height:40px;">
+  </a>
 
-  <style>
-    body{
-        font-family: 'Poppins', sans-serif; 
-    }
-    .navbar-custom {
-      background-color: #00003B; /* dark blue background */
-      padding: 0.5rem 2rem;      /* space left & right */
-    }
-    .navbar-brand img {
-      height: 40px; /* adjust logo size */
-    }
-    .menu-toggle {
-      color: white;
-      font-size: 1.4rem;   /* bigger text */
-      font-weight: 600;    /* bold text */
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-    .menu-toggle i {
-      margin-right: 6px; /* space between icon & text */
-      font-size: 1.6rem;
-    }
-
-    /* Dropdown customization */
-    .dropdown-menu {
-      background-color: #AFFBF7 !important;  /* dropdown background */
-      border: none;              
-      border-radius: 0.5rem;    
-      min-width: 150px;  
-      margin-top: 1rem !important;  
-      box-shadow: none !important;    
-      margin-right: -30px;
-    }
-    .dropdown-item {
-      color: #00003B !important;   
-      font-weight: 500;
-    }
-    .dropdown-item:hover,
-    .dropdown-item:focus {
-      background-color: transparent !important; /* disable hover effect */
-      color: #00003B !important;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-
-  <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
-    <!-- Logo (shifted slightly right by padding in navbar) -->
-    <a class="navbar-brand text-white fw-bold" href="#">
-      <img src="assets/images/logo.png" alt="Logo"> 
-    </a>
-
-    <!-- Search bar (right aligned) -->
-    <div class="search-container flex-grow-1 d-flex justify-content-center">
-      <!-- The search bar will be injected here dynamically -->
-      <div id="search-wrapper"></div>
+  <div class="menu-container d-flex align-items-center">
+    <div class="menu-toggle" id="menuToggle" role="button" aria-label="Open menu">
+      <i class="bi bi-list"></i> <span class="menu-label">Menu</span>
     </div>
 
-    <!-- Menu on right -->
-    <div class="dropdown me-4"> <!-- 'me-4' moves it a bit left from edge -->
-      <div class="menu-toggle" id="menuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-        <i class="bi bi-list"></i> Menu
-      </div>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="dashboard.html">Dashboard</a></li>
-        <li><a class="dropdown-item" href="ledger.html">Attack Ledger</a></li>
-        <li><a class="dropdown-item" href="brand.html">Brands</a></li>
-        <!-- <li><a class="dropdown-item" href="contact.html">Contact</a></li> -->
-      </ul>
+    <div class="horizontal-menu d-flex align-items-center" id="horizontalMenu" aria-hidden="true">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="ledger.html">Attack Ledger</a>
+      <a href="company.html">Brands</a>
+      <i class="bi bi-x close-icon" id="closeMenu"></i> <!-- ✅ X icon at the end -->
     </div>
-  </nav>
+  </div>
+</nav>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<style>
+.navbar-custom {
+  background-color: #00003B;
+  padding: 0.5rem 2rem;
+  z-index: 1000;
+  overflow: hidden;
+}
+.menu-toggle {
+  color: white;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  transition: all 0.3s ease;
+}
+.menu-toggle i { margin-right: 4px; font-size: 1.6rem; transition: transform 0.3s ease; }
+
+.horizontal-menu {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  position: absolute;
+  top: 0;
+  right: -100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: #00003B;
+  padding: 0 2rem;
+  transition: right 0.4s ease;
+}
+.horizontal-menu a, .horizontal-menu .close-icon {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.horizontal-menu a:hover, .horizontal-menu .close-icon:hover { color: #4FFAEE; }
+.horizontal-menu.show { right: 0; }
+
+.close-icon {
+  font-size: 1.7rem;
+  display: none; /* will appear only when menu opens */
+}
+
+.horizontal-menu.show .close-icon {
+  display: inline-block;
+}
+
+@media (max-width: 576px) {
+  .horizontal-menu { flex-direction: column; align-items: flex-start; top: 100%; right: 0; width: 100%; background-color: #00003B; padding: 1rem; }
+}
+</style>

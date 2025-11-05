@@ -1,0 +1,91 @@
+body {
+  font-family: 'verdana', sans-serif;
+  background-color: #f4f4f4;
+  color: #333333;
+  background-image: url('../images/brandbg.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+  margin: 0;
+  padding-top: 100px; /* Push content below navbar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+#company-header {
+  color: white;
+
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.company-options {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: calc(100vh - 200px); /* Adjust height considering navbar + header */
+  padding: 0 1vw;
+}
+
+.company-option {
+  border-radius: 15px;
+  width: 35%;
+  height: 60vh;
+  position: relative;
+  border: 3px solid cyan;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.company-option img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: co;
+  border-radius: 15px;
+}
+
+.company-option p {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 10px 25px;
+  border-radius: 10px;
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.company-option:hover {
+  transform: translateY(-10px);
+  filter: drop-shadow(0 15px 30px rgba(0, 255, 255, 0.8));
+}
+
+button.btn.rounded-circle:hover {
+  background-color: #55dddd;
+}

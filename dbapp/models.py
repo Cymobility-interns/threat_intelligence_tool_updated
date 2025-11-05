@@ -72,6 +72,7 @@ class AutomotiveVulnerability(Base):
     level_of_attack = Column(String, nullable=True)
     damage_scenario = Column(String, nullable=True)
     cia = Column(String, nullable=True)
+    cvss_score = Column(Float, nullable=True)
     impact = Column(String, nullable=True)
     feasibility = Column(String, nullable=True)
     countermeasures = Column(String, nullable=True)

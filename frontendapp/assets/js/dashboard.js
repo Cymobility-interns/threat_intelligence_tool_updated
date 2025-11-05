@@ -1,11 +1,12 @@
 import { fetchVulnerabilities } from "./api.js";
 
+// Function to count vulnerabilities for Chart 1: Interface Distribution
 async function getInterfaceCounts() {
   const vulnerabilities = await fetchVulnerabilities();
   console.log("Fetched vulnerabilities:", vulnerabilities);
 
-  const labels = ["CAN", "LIN", "Ethernet", "Wi-Fi","Infotainment", "Telematics","Bluetooth"];
-  const counts = { CAN: 0, LIN: 0, Ethernet: 0, "Wi-Fi": 0, Infotainment:0, Telematics:0, Bluetooth:0};
+  const labels = ["CAN", "LIN", "Ethernet", "Wi-Fi", "Bluetooth"];
+  const counts = { CAN: 0, LIN: 0, Ethernet: 0, "Wi-Fi": 0, Bluetooth: 0 };
 
   vulnerabilities.forEach(vul => {
     labels.forEach(label => {
@@ -18,15 +19,59 @@ async function getInterfaceCounts() {
     });
   });
 
-  const total = vulnerabilities.length;
-  counts.Others = total - Object.values(counts).reduce((a, b) => a + b, 0);
+  return counts;
+}
+
+// Function to count vulnerabilities for Chart 2: ECU/System Distribution
+async function getECUCounts() {
+  const vulnerabilities = await fetchVulnerabilities();
+
+  const labels = ["Infotainment", "ADAS", "Telematics", "Body Control Unit"];
+  const counts = { Infotainment: 0, ADAS: 0, Telematics: 0, "Body Control Unit": 0 };
+
+  vulnerabilities.forEach(vul => {
+    labels.forEach(label => {
+      const searchText = label.toLowerCase();
+      if (
+        (vul.description && vul.description.toLowerCase().includes(searchText)) ||
+        (vul.interface && vul.interface.toLowerCase().includes(searchText)) ||
+        (vul.title && vul.title.toLowerCase().includes(searchText)) ||
+        (vul.ecu_name && vul.ecu_name.toLowerCase().includes(searchText)) ||
+        (vul.component && vul.component.toLowerCase().includes(searchText))
+      ) counts[label]++;
+    });
+  });
 
   return counts;
 }
 
+// Function to count vulnerabilities for Chart 3: Protocol Distribution
+async function getProtocolCounts() {
+  const vulnerabilities = await fetchVulnerabilities();
+
+  const labels = ["Linux", "Bootloader", "Secure Storage firmware", "ECU Firmware", "Sensor Firmware"];
+  const counts = { Linux: 0, Bootloader: 0, "Secure Storage firmware": 0, "ECU Firmware": 0, "Sensor Firmware": 0 };
+
+  vulnerabilities.forEach(vul => {
+    labels.forEach(label => {
+      const searchText = label.toLowerCase();
+      if (
+        (vul.description && vul.description.toLowerCase().includes(searchText)) ||
+        (vul.interface && vul.interface.toLowerCase().includes(searchText)) ||
+        (vul.title && vul.title.toLowerCase().includes(searchText)) ||
+        (vul.protocol && vul.protocol.toLowerCase().includes(searchText)) ||
+        (vul.component && vul.component.toLowerCase().includes(searchText))
+      ) counts[label]++;
+    });
+  });
+
+  return counts;
+}
+
+// Render Chart 1: Interface Distribution
 async function renderInterfaceChart() {
   const counts = await getInterfaceCounts();
-  const chartLabels = ["CAN", "LIN", "Ethernet", "Wi-Fi", "Infotainment", "Telematics", "Bluetooth"];
+  const chartLabels = ["CAN", "LIN", "Ethernet", "Wi-Fi", "Bluetooth"];
   const chartData = chartLabels.map(label => counts[label] || 0);
 
   const ctx = document.getElementById("interfaceChart").getContext("2d");
@@ -36,8 +81,9 @@ async function renderInterfaceChart() {
       labels: chartLabels,
       datasets: [{
         data: chartData,
-        backgroundColor: ["#4FFAEE", "#CEF9F6", "#31A49C", "#B8BEBD", "#107FE4", "#2969A4", "#147A73"],
-        borderWidth: 1
+        backgroundColor: ["#4FFAEE", "#CEF9F6", "#31A49C", "#B8BEBD", "#147A73"],
+        borderWidth: 2,
+        borderColor: "#ffffff"
       }]
     },
     options: {
@@ -46,15 +92,16 @@ async function renderInterfaceChart() {
       plugins: { 
         legend: { 
           position: "left", 
-          labels: { font: { weight: 'bold' } } 
+          labels: { 
+            font: { weight: 'bold', size: 11 },
+            color: "#ffffff"
+          } 
         } 
       },
-      // 👇 Add interaction
       onClick: (evt, elements) => {
         if (elements.length > 0) {
           const chartIndex = elements[0].index;
           const selectedLabel = pieChart.data.labels[chartIndex];
-          // Redirect with filter query
           window.location.href = `ledger.html?filter=${encodeURIComponent(selectedLabel)}`;
         }
       }
@@ -62,80 +109,89 @@ async function renderInterfaceChart() {
   });
 }
 
+// Render Chart 2: ECU/System Distribution
+async function renderECUChart() {
+  const counts = await getECUCounts();
+  const chartLabels = ["Infotainment", "ADAS", "Telematics", "Body Control Unit"];
+  const chartData = chartLabels.map(label => counts[label] || 0);
 
-
-// Render recent attacks (first 8 for example)
-async function renderRecentAttacks() {
-  const vulnerabilities = await fetchVulnerabilities();
-  // Sort by published_date descending (most recent first)
-  vulnerabilities.sort((a, b) => {
-    const dateA = new Date(a.published_date);
-    const dateB = new Date(b.published_date);
-    return dateB - dateA; // newest first
-  });
-
-  const attackList = document.getElementById("attack-list");
-  attackList.innerHTML = "";
-
-  // Create table
-  const table = document.createElement("table");
-  table.classList.add("table", "table-bordered", "table-sm");
-  table.style.backgroundColor = "#0a0f1a"; // dark navy (from your screenshot)
-  table.style.color = "#ffffff"; // white text
-  table.style.borderCollapse = "collapse"; // clean look
-  table.style.width = "100%";
-
-  // Table header
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr style="background-color: #0a0f1a; color: #ffffff; border-bottom: 1px solid #555;">
-      <th style="padding: 12px;">CVE ID</th>
-      <th style="padding: 12px;">Title</th>
-    </tr>
-  `;
-  table.appendChild(thead);
-
-  // Table body
-  const tbody = document.createElement("tbody");
-
-  vulnerabilities.slice(0, 8).forEach(vul => {
-    const tr = document.createElement("tr");
-    tr.style.borderBottom = "1px solid #555"; // grey row divider
-
-    // CVE ID column
-    const tdCve = document.createElement("td");
-    tdCve.style.padding = "12px"; // increase row height
-    if (vul.cve_id) {
-      const link = document.createElement("a");
-      link.href = `details.html?cve=${encodeURIComponent(vul.cve_id)}`;
-
-      link.textContent = vul.cve_id;
-      link.style.color = "#ffffff"; 
-      link.style.fontWeight = "bold";
-      link.style.textDecoration = "none";
-      tdCve.appendChild(link);
-    } else {
-      tdCve.textContent = "N/A";
+  const ctx = document.getElementById("ecuChart").getContext("2d");
+  const pieChart = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        data: chartData,
+        backgroundColor: ["#FF6B9D", "#C44569", "#FFA07A", "#FA8072"],
+        borderWidth: 2,
+        borderColor: "#ffffff"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { 
+          position: "left", 
+          labels: { 
+            font: { weight: 'bold', size: 11 },
+            color: "#ffffff"
+          } 
+        } 
+      },
+      onClick: (evt, elements) => {
+        if (elements.length > 0) {
+          const chartIndex = elements[0].index;
+          const selectedLabel = pieChart.data.labels[chartIndex];
+          window.location.href = `ledger.html?filter=${encodeURIComponent(selectedLabel)}`;
+        }
+      }
     }
-    tr.appendChild(tdCve);
-
-    // Title column
-    const tdTitle = document.createElement("td");
-    tdTitle.textContent = vul.title || "Untitled Attack";
-    tdTitle.style.padding = "12px"; // increase row height
-    tr.appendChild(tdTitle);
-
-    tbody.appendChild(tr);
   });
-
-  table.appendChild(tbody);
-  attackList.appendChild(table);
 }
 
+// Render Chart 3: Protocol Distribution
+async function renderProtocolChart() {
+  const counts = await getProtocolCounts();
+  const chartLabels = ["Linux", "Bootloader", "Secure Storage firmware", "ECU Firmware", "Sensor Firmware"];
+  const chartData = chartLabels.map(label => counts[label] || 0);
 
+  const ctx = document.getElementById("protocolChart").getContext("2d");
+  const pieChart = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        data: chartData,
+        backgroundColor: ["#FFD700", "#FFA500", "#FF8C00", "#FF7F50", "#FF6347"],
+        borderWidth: 2,
+        borderColor: "#ffffff"
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { 
+          position: "left", 
+          labels: { 
+            font: { weight: 'bold', size: 11 },
+            color: "#ffffff"
+          } 
+        } 
+      },
+      onClick: (evt, elements) => {
+        if (elements.length > 0) {
+          const chartIndex = elements[0].index;
+          const selectedLabel = pieChart.data.labels[chartIndex];
+          window.location.href = `ledger.html?filter=${encodeURIComponent(selectedLabel)}`;
+        }
+      }
+    }
+  });
+}
 
-
-
+// Render Line Chart: Yearly Vulnerabilities Trend
 async function renderYearlyChart() {
   const vulnerabilities = await fetchVulnerabilities();
 
@@ -154,17 +210,21 @@ async function renderYearlyChart() {
 
   const ctx = document.getElementById("yearlyChart").getContext("2d");
   new Chart(ctx, {
-    type: "line",
+    type: "bar",
     data: {
       labels: years,
       datasets: [{
         label: "Vulnerabilities by Year",
         data: counts,
-        borderColor: "#00FFFF",   // cyan line
-        backgroundColor: "rgba(0, 255, 255, 0.2)", // light fill under curve
-        borderWidth: 2,
-        pointBackgroundColor: "#FFD700", // gold points
-        tension: 0.3   // smooth curve
+        borderColor: "#00FFFF",
+        backgroundColor: "rgba(0, 255, 255, 0.2)",
+        borderWidth: 3,
+        pointBackgroundColor: "#FFD700",
+        pointBorderColor: "#00003b",
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        tension: 0.4,
+        fill: true
       }]
     },
     options: {
@@ -173,26 +233,74 @@ async function renderYearlyChart() {
       plugins: {
         legend: {
           labels: {
-            color: "#ffffff",   // white text for dark background
-            font: { weight: "bold" }
+            color: "#ffffff",
+            font: { weight: "bold", size: 14 }
           }
         }
       },
       scales: {
         x: {
-          ticks: { color: "#ffffff" },
-          grid: { color: "rgba(255,255,255,0.2)" }
+          ticks: { 
+            color: "#ffffff",
+            font: { size: 12, weight: "bold" }
+          },
+          grid: { color: "rgba(255,255,255,0.1)" }
         },
         y: {
-          ticks: { color: "#ffffff" },
-          grid: { color: "rgba(255,255,255,0.2)" }
+          ticks: { 
+            color: "#ffffff",
+            font: { size: 12, weight: "bold" }
+          },
+          grid: { color: "rgba(255,255,255,0.1)" }
         }
       }
     }
   });
 }
 
+// Render Recent Attacks Table
+async function renderRecentAttacks() {
+  const vulnerabilities = await fetchVulnerabilities();
+  
+  // Sort by published_date (most recent first) and get top 5
+  const recentAttacks = vulnerabilities
+    .filter(vul => vul.published_date)
+    .sort((a, b) => new Date(b.published_date) - new Date(a.published_date))
+    .slice(0, 5);
 
+  const tableBody = document.getElementById("recentAttacksBody");
+  tableBody.innerHTML = "";
+
+  recentAttacks.forEach(attack => {
+    const row = document.createElement("tr");
+    
+    const cveId = attack.cve_id || attack.id || "N/A";
+    const title = attack.title || "Unknown";
+    const attackType = attack.types_of_attack || attack.attack_type || attack.type || "N/A";
+    
+    // Use cve_id if available, otherwise use internal-{id} format
+    let urlParam;
+    if (attack.cve_id) {
+      urlParam = attack.cve_id;
+    } else if (attack.id) {
+      urlParam = `internal-${attack.id}`;
+    } else {
+      urlParam = "";
+    }
+    
+    row.innerHTML = `
+      <td><a href="details.html?cve=${encodeURIComponent(urlParam)}" class="cve-link">${cveId}</a></td>
+      <td>${title}</td>
+      <td>${attackType}</td>
+    `;
+    
+    tableBody.appendChild(row);
+  });
+}
+
+// Initialize all charts and table
 renderInterfaceChart();
-renderRecentAttacks();
+renderECUChart();
+renderProtocolChart();
 renderYearlyChart();
+renderRecentAttacks();
