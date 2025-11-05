@@ -34,6 +34,7 @@ from typing import Optional
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from starlette.middleware.sessions import SessionMiddleware
+import requests
 
 
 app = FastAPI()
@@ -55,6 +56,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="super-secret-key",
+    same_site="none",   # allow cross-site
+    https_only=False    # must be False if you’re on HTTP.
+)
 
 
 @app.get("/")
@@ -72,6 +79,7 @@ def get_vulnerabilities(
     from_date: str | None = Query(None, alias="from"),
     to_date: str | None = Query(None, alias="to"),
     search: str | None = None,
+    cve_type: str | None = Query(None),
 ):
     query = db.query(AutomotiveVulnerability)
 
@@ -97,6 +105,17 @@ def get_vulnerabilities(
                 AutomotiveVulnerability.company.ilike(search_like),
                 AutomotiveVulnerability.interface.ilike(search_like),
                 AutomotiveVulnerability.ecu_name.ilike(search_like),
+            )
+        )
+
+    # CVE Type filter
+    if cve_type == "CVE":
+        query = query.filter(AutomotiveVulnerability.cve_id.like("CVE-%"))
+    elif cve_type == "Non-CVE":
+        query = query.filter(
+            or_(
+              AutomotiveVulnerability.cve_id == None,
+              AutomotiveVulnerability.cve_id == "Not Available",
             )
         )
 
@@ -195,4 +214,3 @@ def get_current_user(request: Request):
         "username": user["username"],
         "name": user["name"]
         }
-

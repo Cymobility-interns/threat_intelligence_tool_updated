@@ -1,17 +1,22 @@
 export const API_BASE = "http://127.0.0.1:8000";
 
-export async function fetchVulnerabilities({ from, to, search } = {}) {
+/**
+ * Fetch vulnerabilities with optional filters.
+ * Accepts: { from, to, search, cveType }
+ * Sends cveType as `cve_type` query param (backend-friendly).
+ */
+export async function fetchVulnerabilities({ from, to, search, cveType } = {}) {
   try {
-    let url = `${API_BASE}/automotive_vulnerabilities`;
     const params = new URLSearchParams();
 
     if (from) params.append("from", from);
     if (to) params.append("to", to);
     if (search) params.append("search", search);
+    if (cveType) params.append("cve_type", cveType); // <-- important change
 
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
+    const url = params.toString()
+      ? `${API_BASE}/automotive_vulnerabilities?${params.toString()}`
+      : `${API_BASE}/automotive_vulnerabilities`;
 
     const response = await fetch(url);
     if (!response.ok) {

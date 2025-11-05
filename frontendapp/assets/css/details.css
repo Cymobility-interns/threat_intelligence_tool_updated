@@ -1,51 +1,70 @@
 body {
     background-color: #00003b;  /* page dark background */
     color: #FFFFFF;             /* default text outside container */
-    background-image: url('../images/branddarker.jpg');
+    background-image: url('../images/brandbg.jpg');
      background-position: center;    /* center the image */
     background-repeat: no-repeat;   /* prevent repeating */
     background-size: cover;       /* cover the entire background */
+    font-family: Verdana, Geneva, Tahoma, sans-serif !important;
 }
 
 /* Details container styling */
 #details-container {
-  background-color: #ffffff;   /* white background */
-  color: #000000;              /* black text */
-  border: 1px solid #000;      /* black outline */
-  border-radius: 8px;
-  max-width: 100%;             /* full width of container */
-  width: 95%;                  /* broader width */
-  margin:auto;                /* center horizontally */
+  width: 95%;
+  margin: auto;
+  padding: 20px;
+  background: none !important;      /* Ensure no background */
+  border: none !important;          /* Remove border */
+  box-shadow: none !important;      /* Remove shadow */
+  color: white;
 }
 
-/* Title inside details */
+/* Attack Title */
 #details-container h5 {
-  text-align: left;            /* align title to top/left */
+  text-align: center;
   font-weight: bold;
-  margin-bottom: 20px;
-  color: #000000;              /* black text */
+  color: cyan;
+  text-shadow: none !important;     /* Remove text shadow */
 }
 
 /* Definition list styling */
 #details-container dl {
   margin: 0;
   padding: 0;
+  background: none !important;      /* Ensure no background */
 }
 
-#details-container dt,
-#details-container dd {
-  display: table-cell;
-  padding: 10px;
-  vertical-align: top;
-}
-
+/* Field labels (dt) and values (dd) */
 #details-container dt {
+  color: cyan;
   font-weight: bold;
   text-transform: capitalize;
+  padding: 5px 0;
+  background: none !important;
 }
 
-#details-container dl > dt:last-of-type,
-#details-container dl > dd:last-of-type {
-  border-bottom: none;
+#details-container dd {
+  color: white;
+  padding: 5px 0;
+  background: none !important;
+}
+
+/* Download Report button */
+#download-btn {
+  border: 2px solid cyan;
+  color: white;
+  background: transparent !important;
+  font-weight: 600;
+}
+
+#download-btn:hover {
+  background-color: cyan;
+  /* color: #2ab6e0; */
+  transform: scale(1.05);
+  box-shadow: 0 0 10px cyan;
+}
+
+button.btn.rounded-circle:hover {
+  background-color: #55dddd;
 }
 

@@ -1,17 +1,18 @@
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: Verdana, Geneva, Tahoma, sans-serif !important;
   background-color: #00003b;
   color: #ffffff;
-  background-image: url('../images/branddarker.jpg');
+  background-image: url('../images/dashboardbg.jpg');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   min-height: 100vh;
-}
-
-html, body {
   overflow: hidden;
 }
+
+/* html, body {
+  overflow: hidden;
+} */
 
 /* Navbar */
 .navbar-custom {
@@ -20,7 +21,7 @@ html, body {
 }
 
 .nav-link {
-  color: white !important;
+  color: white;
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
@@ -29,7 +30,7 @@ html, body {
 }
 
 .nav-link:hover {
-  background-color: #55dddd;
+  color: #55dddd;
 }
 
 /* User icon */
@@ -47,155 +48,191 @@ html, body {
   z-index: 1000;
 }
 
-/* Flex layout for chart + recent attacks */
+/* Dashboard Content */
 .dashboard-content {
   display: flex;
-  gap: 50px;
-  align-items: flex-start;
-  margin: 50px 80px;
+  flex-direction: column;
+  padding: 15px 50px;
+  gap: 15px;
+  overflow-y: auto;
+  height: calc(100vh - 60px);
 }
 
-/* Pie chart section */
-#chart-section {
-  flex: 1;
-  max-width: 500px;
+/* Pie Charts Container */
+.pie-charts-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 15px;
   width: 100%;
-  margin-top: 0px !important;
-  padding-top: 0px !important;
-  
+  margin: 5px 0;
 }
 
-/* Recent attacks section */
-#recent-attacks {
-  flex: 1;
-}
-
-#recent-attacks h3 {
-  margin-bottom: 15px;
-  font-weight: bold;
-  margin-left: 280px;
-  margin-top: 15px;
-  
-}
-
-#attack-list {
-  list-style: none;
-  padding: 0;
-}
-
-#attack-list li {
-  margin-bottom: 10px;
-  background-color: #ffffff;
-  color:#00003b;
-  padding: 10px;
-  width: 600px !important;
-  border-radius: 5px;
-  margin-left: 80px;
-  font-weight: bold; /* bold attack titles */
-}
-
-#left-section {
+.chart-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; 
-   margin-top: 0 !important;
+  padding: 10px;
+  border-radius: 10px;
 }
 
-/* Brand Vulnerabilities Button */
-#next {
-  background-color: #55dddd;
-  color: #00003b;
-  padding: 10px 15px;
-  border-radius: 5px;
+.chart-wrapper h4 {
+  color: #55dddd;
   font-weight: bold;
-  font-size: large;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 800px;
-  margin-top: -25px !important;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 15px;
 }
-#click {
-  background-color: #00003b;
-  color: #ffffff;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  margin-left: 10px;
+
+.chart-wrapper canvas {
+  width: 100% !important;
+  height: 200px !important;
+  max-width: 250px;
+}
+
+/* Line Chart Section */
+#linechart-section {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+}
+
+#linechart-section h3 {
+  color: #55dddd;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 16px;
+}
+
+#yearlyChart {
+  width: 100% !important;
+  height: 280px !important;
+}
+
+/* Recent Attacks Section */
+.recent-attacks-section {
+  width: 100%;
+  padding: 20px 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.recent-attacks-section h3 {
+  color: #55dddd;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.table-container {
+  background: transparent;
+  border-radius: 10px;
+  padding: 15px;
+  overflow-x: auto;
+}
+
+.recent-attacks-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.recent-attacks-table thead {
+  background: transparent;
+}
+
+.recent-attacks-table th {
+  color: #55dddd;
+  font-weight: bold;
+  padding: 12px;
+  text-align: left;
+  border: 2px solid #ffffff;
   font-size: 14px;
 }
 
-#click a {
+.recent-attacks-table td {
   color: #ffffff;
-  text-decoration: none;
-}
-#chart-section {
-  max-width: 500px;
-  width: 100%;
-  position: relative;
-  top: -70px;
-  /* margin-top: 0px !important; */
+  padding: 12px;
+  border: 2px solid #ffffff;
+  font-size: 13px;
 }
 
-#more {
-  background-color: #55dddd;
-  color: #00003b;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  font-size: 18px;
-  margin-left: 280px;
-  width: 200px;
-  margin-right: 300px;
-  margin-bottom: 10px !important;
-  margin-top: -10px !important;
+.recent-attacks-table tbody tr:hover {
+  background: rgba(85, 221, 221, 0.1);
+  transition: background 0.3s;
 }
 
-#more a {
-  color: #00003b;
+.cve-link {
+  color: #55dddd;
   text-decoration: none;
   font-weight: bold;
+  transition: color 0.3s;
 }
 
-
-#interfaceChart {
-  width: 100% !important;
-  height: 100% !important;
+.cve-link:hover {
+  color: #4FFAEE;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-/* Make entire table match dark navy background */
-#attack-list table {
-  background-color: #0a0f1a; /* dark navy */
-  color: #ffffff;           /* white text */
-  border-collapse: collapse;
-  width: 100%;
+.read-more-btn {
+  display: block;
+  margin: 15px auto 0;
+  padding: 10px 30px;
+  background: linear-gradient(135deg, #55dddd, #31A49C);
+  color: #00003b;
+  border: none;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
-/* Table header */
-#attack-list th {
-  background-color: #0a0f1a;
-  color: #ffffff;
-  border: 1px solid #555; /* grey border */
-  padding: 8px;
-  text-align: left;
+.read-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(85, 221, 221, 0.4);
 }
 
-/* Table rows */
-#attack-list td {
-  border: 1px solid #555; /* grey row border */
-  padding: 12px !important;          /* increase height */
-  color: #ffffff;
-  background-color: #0a0f1a;
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .pie-charts-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .chart-wrapper {
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .dashboard-content {
+    padding: 30px 40px;
+  }
 }
 
-/* Hover effect (optional) */
-#attack-list tr:hover td {
-  background-color: #1a1f2e; /* lighter navy on hover */
-}
-
-#linechart-section {
-  position: relative;
-  top: -50px;
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 20px;
+  }
+  
+  .recent-attacks-table th,
+  .recent-attacks-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .read-more-btn {
+    font-size: 12px;
+    padding: 8px 20px;
+  }
 }

@@ -22,11 +22,85 @@
 <body class="bg-custom text-light">
 
   <!-- Navbar placeholder -->
-  <div id="navbar-container"></div>
+  <div id="navbar"></div>
 
   <!-- Threat Stream Table -->
   <div class="container-fluid my-4 px-3">
-    <h3 class="text-center mb-4"><b>Attack Ledger</b></h3>
+    <div class="d-flex align-items-center justify-content-center position-relative mb-4">
+      <!-- Back Button -->
+      <button 
+        class="btn btn-outline-light rounded-circle position-absolute start-0 d-flex align-items-center justify-content-center"
+      style="width: 40px; height: 40px; border: 2px solid #55dddd;"
+      onclick="window.location.href='dashboard.html'"
+      >
+        <i class="bi bi-arrow-left" style="font-size: 1.4rem; font-weight: bold;"></i>
+      </button>
+
+      <!-- Title -->
+      <h2 class="text-center mb-0"><b>Attack Ledger</b></h2>
+    </div>
+
+    <!-- Control Bar (Search + Filter + Reset) -->
+    <div class="container-fluid mb-3 px-3">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        
+        <!-- Left: Search Bar -->
+        <div class="input-group" style="max-width: 600px; flex: 1;">
+          <input type="text" id="ledger-search" class="form-control" placeholder="Search vulnerabilities...">
+          <button class="btn btn-outline-light" id="ledger-search-btn">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+
+        <!-- Right: Filter + Reset -->
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-info" id="filter-btn">
+            <i class="bi bi-funnel"></i> Filter
+          </button>
+          <button class="btn btn-outline-light" id="reset-all-btn">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- Filter Sidebar -->
+    <div id="filter-sidebar" class="filter-sidebar text-light p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0" style="color: #AAEEEE; font-weight: bold;">Advanced Filters</h5>
+        <button class="btn btn-sm btn-outline-light" id="close-filter">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <hr>
+
+      <!-- CVE Filter -->
+      <div class="mb-3">
+        <label class="form-label">CVE Type</label>
+        <select id="filter-cve-type" class="form-select">
+          <option value="">All</option>
+          <option value="CVE">CVE Only</option>
+          <option value="Non-CVE">Non-CVE Only</option>
+        </select>
+      </div>
+
+      <!-- Date Range -->
+      <div class="mb-3">
+        <label class="form-label">Date Range</label>
+        <input type="date" id="filter-from" class="form-control mb-2" placeholder="From">
+        <input type="date" id="filter-to" class="form-control" placeholder="To">
+      </div>
+
+      <!-- Apply and Reset Buttons -->
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-info" id="apply-filters-btn">Apply</button>
+        <button class="btn btn-info" id="reset-filters-btn">Reset</button>
+      </div>
+    </div>
+
+
     <div class="table-responsive">
       <table class="table table-dark align-middle table-fixed">
         <thead>
@@ -51,7 +125,7 @@
   <div id="empty-state" class="text-center" style="display:none;">
     No vulnerabilities found.
   </div>
-
+</body>
 
 
   <!-- Scripts -->
@@ -59,4 +133,20 @@
   <script type="module" src="assets/js/api.js"></script>
   <script type="module" src="assets/js/main.js"></script>
   <script type="module" src="assets/js/ledger.js"></script>
+
+  <!-- load navbar helper script normally (must be available before calling initNavbar) -->
+  <script src="components/navbar.js"></script>
+
+  <script>
+    fetch("components/navbar.html", { cache: 'no-store' })
+      .then(res => res.ok ? res.text() : Promise.reject(res.status))
+      .then(html => {
+        document.getElementById("navbar").innerHTML = html;
+        // NOW call the initializer defined in navbar.js
+        if (typeof window.initNavbar === 'function') window.initNavbar();
+        else console.warn('initNavbar not found — ensure components/navbar.js is loaded.');
+      })
+      .catch(err => console.error('Failed to load navbar:', err));
+  </script>
+
 </html>
