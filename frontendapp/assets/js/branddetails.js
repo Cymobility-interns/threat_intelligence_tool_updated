@@ -375,14 +375,22 @@ downloadBtn.addEventListener("click", async () => {
     doc.setFontSize(16);
     doc.text("Vulnerability Report", 105, 25, { align: "center" });
 
-    // Build rows
-    const rows = fields.map(key => {
-      let value = data[key];
-      if (key === "cve_id" && !value) value = data.id ? `ID: ${data.id}` : "Not Available";
-      if (!value) value = "Not Available";
-      const label = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-      return [label, String(value)];
-    });
+     // Custom label overrides (Acronyms)
+      const labelOverrides = {
+        cve_id: "CVE ID",
+        ecu_name: "ECU Name",
+        cia: "CIA"
+      };
+
+      // Build rows dynamically
+      const rows = fields.map(key => {
+        let value = data[key];
+        if (key === "cve_id" && !value) value = data.id ? `ID: ${data.id}` : "Not Available";
+        if (!value) value = "Not Available";
+
+        const label = labelOverrides[key] || key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+        return [label, String(value)];
+      });
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();

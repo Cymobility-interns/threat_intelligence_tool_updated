@@ -150,13 +150,24 @@ document.getElementById("download-btn").addEventListener("click", async () => {
       "countermeasures","model_name","model_year","ecu_name","library_name"
     ];
 
+    // Custom label overrides for acronyms
+    const labelOverrides = {
+      cve_id: "CVE ID",
+      ecu_name: "ECU Name",
+      cia: "CIA"
+    };
+
     const rows = fields.map(key => {
       let value = data[key];
       if (key === "cve_id" && !value) value = data.id ? `ID: ${data.id}` : "Not Available";
       if (!value) value = "Not Available";
-      const label = key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+      // Use override label if available, else fallback to auto format
+      const label = labelOverrides[key] || key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
       return [label, String(value)];
     });
+
 
     // Draw table + watermark (watermark AFTER content so it is visible)
     doc.autoTable({
