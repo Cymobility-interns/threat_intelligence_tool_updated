@@ -2,7 +2,7 @@ body {
     background-color: #00003b;  /* page dark background */
     color: #FFFFFF;             /* default text outside container */
     background-image: url('../images/brandbg.jpg');
-     background-position: center;    /* center the image */
+    background-position: center;    /* center the image */
     background-repeat: no-repeat;   /* prevent repeating */
     background-size: cover;       /* cover the entire background */
     font-family: Verdana, Geneva, Tahoma, sans-serif !important;
@@ -40,14 +40,27 @@ body {
   font-weight: bold;
   text-transform: capitalize;
   padding: 5px 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
   background: none !important;
+  border-bottom: 1px solid rgba(85, 221, 221, 0.3); /* Horizontal line after field name */
+  margin-bottom: 0;
 }
 
 #details-container dd {
   color: white;
   padding: 5px 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
   background: none !important;
+  border-bottom: 1px solid rgba(85, 221, 221, 0.3); /* Horizontal line after each field value */
+  margin-bottom: 0;
 }
+
+/* Remove border from the last field value
+#details-container dd:last-of-type {
+  border-bottom: none;
+} */
 
 /* Download Report button */
 #download-btn {
@@ -67,4 +80,3 @@ body {
 button.btn.rounded-circle:hover {
   background-color: #55dddd;
 }
-

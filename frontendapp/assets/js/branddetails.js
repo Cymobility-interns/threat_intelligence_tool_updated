@@ -344,7 +344,7 @@ selectAllCheckbox.addEventListener("change", () => {
 downloadBtn.addEventListener("click", async () => {
   const selected = [...document.querySelectorAll(".select-row:checked")].map(cb => cb.dataset.id);
   if (selected.length === 0) {
-    alert("Please select at least one vulnerability to download.");
+    alert("Please select at least one vulnerability to download the report.");
     return;
   }
 
