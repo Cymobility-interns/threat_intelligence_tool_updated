@@ -358,7 +358,7 @@ downloadBtn.addEventListener("click", async () => {
 
   const fields = [
     "cve_id","source","published_date","company","title","description","attack_path","interface",
-    "tools_used","types_of_attack","level_of_attack","damage_scenario","cia","impact","feasibility",
+    "tools_used","types_of_attack","level_of_attack","damage_scenario","cia","cvss_score","impact","feasibility",
     "countermeasures","model_name","model_year","ecu_name","library_name"
   ];
 
@@ -379,7 +379,8 @@ downloadBtn.addEventListener("click", async () => {
       const labelOverrides = {
         cve_id: "CVE ID",
         ecu_name: "ECU Name",
-        cia: "CIA"
+        cia: "CIA",
+        cvss_score: "CVSS Score"
       };
 
       // Build rows dynamically
