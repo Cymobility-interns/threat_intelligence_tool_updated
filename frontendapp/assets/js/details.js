@@ -47,12 +47,13 @@ async function renderDetails() {
   const fieldLabels = {
     cve_id: "CVE ID",
     cia: "CIA",
+    cvss_score: "CVSS Score",
     ecu_name: "ECU Name",
   };
 
   const fields = [
     "cve_id","source","published_date","company","title","description","attack_path","interface",
-    "tools_used","types_of_attack","level_of_attack","damage_scenario","cia","impact","feasibility",
+    "tools_used","types_of_attack","level_of_attack","damage_scenario","cia","cvss_score","impact","feasibility",
     "countermeasures","model_name","model_year","ecu_name","library_name"
   ];
 
@@ -146,13 +147,14 @@ document.getElementById("download-btn").addEventListener("click", async () => {
     // Prepare table data
     const fields = [
       "cve_id","source","published_date","company","title","description","attack_path","interface",
-      "tools_used","types_of_attack","level_of_attack","damage_scenario","cia","impact","feasibility",
+      "tools_used","types_of_attack","level_of_attack","damage_scenario","cia","cvss_score","impact","feasibility",
       "countermeasures","model_name","model_year","ecu_name","library_name"
     ];
 
     // Custom label overrides for acronyms
     const labelOverrides = {
       cve_id: "CVE ID",
+      cvss_score: "CVSS Score",
       ecu_name: "ECU Name",
       cia: "CIA"
     };
