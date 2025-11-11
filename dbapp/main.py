@@ -39,7 +39,7 @@ import requests
 
 app = FastAPI()
 
-app.add_middleware(SessionMiddleware, secret_key="super-secret-key")  # use env var in prod
+# app.add_middleware(SessionMiddleware, secret_key="super-secret-key")  # use env var in prod
 
 
 # ----------------- CORS Setup -----------------
@@ -59,7 +59,7 @@ app.add_middleware(
 app.add_middleware(
     SessionMiddleware,
     secret_key="super-secret-key",
-    same_site="none",   # allow cross-site
+    same_site="lax",   # allow cross-site
     https_only=False    # must be False if you’re on HTTP.
 )
 
