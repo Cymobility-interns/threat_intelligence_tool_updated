@@ -71,9 +71,9 @@
             <li class="nav-item">
               <a class="nav-link" id="brandsLink" href="company.html">Brands</a>
             </li>
-            <li class="nav-item" id="loginLink">
+            <!-- <li class="nav-item" id="loginLink">
               <a class="nav-link" href="login.html">Login</a>
-            </li>
+            </li> -->
 
             <li class="nav-item position-relative" id="userSection">
               <i class="fas fa-user" id="userIcon"></i>
@@ -146,53 +146,47 @@
 
     <!-- Dashboard JS -->
     <script type="module" src="assets/js/dashboard.js"></script>
+    <script type="module" src="assets/js/protected.js"></script>
 
     <script type="module">
-      import { API_BASE } from "./assets/js/api.js";
+      import { logoutUser } from "./assets/js/auth.js";
 
       document.addEventListener("DOMContentLoaded", () => {
-        const userIcon = document.getElementById('userIcon');
-        const userDropdown = document.getElementById('userDropdown');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const userName = document.getElementById('userName');
+        const userSection = document.getElementById("userSection");
+        const userIcon = document.getElementById("userIcon");
+        const userDropdown = document.getElementById("userDropdown");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const userName = document.getElementById("userName");
 
-        // Toggle dropdown
-        userIcon.addEventListener('click', () => {
-          userDropdown.style.display = userDropdown.style.display === 'block' ? 'none' : 'block';
-        });
+        // If you already have user info available (like from /me in another script)
+        // you can set it here, e.g. userName.innerText = sessionUser.name;
+        // Otherwise, just display the section.
 
-        // Hide dropdown if clicked outside
-        document.addEventListener('click', (e) => {
-          if (!userDropdown.contains(e.target) && !userIcon.contains(e.target)) {
-            userDropdown.style.display = 'none';
-          }
-        });
-
-        // Logout
-        logoutBtn.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const response = await fetch(`${API_BASE}/logout`, { method: "POST", credentials: "include" });
-          if (response.ok) window.location.href = "login.html";
-        });
-
-        // Check session and update navbar
-        checkAuthAndUpdateNavbar();
-
-        async function checkAuthAndUpdateNavbar() {
-          const response = await fetch(`${API_BASE}/me`, { credentials: "include" });
-          if (response.ok) {
-            const user = await response.json();
-            document.getElementById("loginLink").style.display = "none";
-            document.getElementById("userSection").style.display = "block";
-            userName.innerText = user.name; // appears only in dropdown
-          } else {
-            document.getElementById("loginLink").style.display = "block";
-            document.getElementById("userSection").style.display = "none";
-            document.getElementById("ledgerLink").href = "login.html?next=ledger.html";
-            document.getElementById("brandsLink").href = "login.html?next=company.html";
-          }
+        if (userSection) {
+          userSection.style.display = "block";
         }
+
+        // Toggle dropdown visibility
+        userIcon?.addEventListener("click", () => {
+          userDropdown.style.display =
+            userDropdown.style.display === "block" ? "none" : "block";
+        });
+
+        // Hide dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+          if (
+            userDropdown &&
+            !userDropdown.contains(e.target) &&
+            !userIcon.contains(e.target)
+          ) {
+            userDropdown.style.display = "none";
+          }
+        });
+
+        // Logout button
+        logoutBtn?.addEventListener("click", logoutUser);
       });
     </script>
+
   </body>
   </html>
