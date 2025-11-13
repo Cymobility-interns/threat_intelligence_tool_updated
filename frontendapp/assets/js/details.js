@@ -179,6 +179,16 @@ document.getElementById("download-btn").addEventListener("click", async () => {
       theme: "grid",
       styles: { fontSize: 10 },
       columnStyles: { 0: { fontStyle: "bold" } },
+
+      didParseCell: function (data) {
+        if (data.section === 'head') {
+          data.cell.styles.fillColor = [0, 0, 102];
+          data.cell.styles.textColor = 255;            
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.halign = 'center';
+        }
+      },
+
       didDrawPage: (data) => {
         try {
           // Enable transparency
