@@ -10,12 +10,27 @@ async function getInterfaceCounts() {
 
   vulnerabilities.forEach(vul => {
     labels.forEach(label => {
-      if (
-        (vul.description && vul.description.includes(label)) ||
-        (vul.interface && vul.interface.includes(label)) ||
-        (vul.title && vul.title.includes(label)) ||
-        (vul.ecu_name && vul.ecu_name.includes(label))
-      ) counts[label]++;
+
+      const fields = [
+        vul.description || "",
+        vul.interface || "",
+        vul.title || "",
+        vul.ecu_name || ""
+      ];
+
+      // ---- SPECIAL CASE: Wi-Fi should match wifi / WiFi / wi fi / wi-fi ----
+      if (label === "Wi-Fi") {
+        const match = fields.some(text => {
+          const normalized = text.toLowerCase().replace(/-/g, "");
+          return normalized.includes("wifi");
+        });
+        if (match) counts[label]++;
+        return; // skip default logic
+      }
+
+      // ---- DEFAULT (for CAN, LIN, Ethernet, Bluetooth) ----
+      const match = fields.some(text => text.includes(label));
+      if (match) counts[label]++;
     });
   });
 
