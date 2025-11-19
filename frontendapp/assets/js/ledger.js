@@ -179,12 +179,27 @@ export function renderVulnerabilities(data) {
   const filter = new URLSearchParams(window.location.search).get("filter");
 
   if (filter && filter !== "Others") {
-    data = data.filter(vul =>
-      (vul.description && vul.description.includes(filter)) ||
-      (vul.interface && vul.interface.includes(filter)) ||
-      (vul.title && vul.title.includes(filter)) ||
-      (vul.ecu_name && vul.ecu_name.includes(filter))
-    );
+
+  data = data.filter(vul => {
+    const fields = [
+      vul.description || "",
+      vul.interface || "",
+      vul.title || "",
+      vul.ecu_name || ""
+    ];
+
+    // Special handling ONLY for Wi-Fi
+    if (filter === "Wi-Fi") {
+      return fields.some(text => {
+        const t = text.toLowerCase().replace(/-/g, "");  // remove hyphens
+        return t.includes("wifi");   // match wifi, wi-fi, WiFi, WI-FI
+      });
+    }
+
+    // NORMAL logic for CAN, LIN, Ethernet, Bluetooth, etc.
+    return fields.some(text => text.includes(filter));
+  })
+  
   } else if (filter === "Others") {
     const labels = ["CAN", "LIN", "Ethernet", "Wifi", "Bluetooth", "Telematics"];
     data = data.filter(vul =>
