@@ -121,23 +121,33 @@ def classify_batch(records, sub_batch_size=10):
         # Build Grok classification prompt
         prompt = f"""
 You are a strict vulnerability classifier.
-Classify each of the following CVE descriptions into one of these labels:
+Classify each CVE description into one of these labels:
 {', '.join(LABELS)}
 
-Rules:
-- If the description states that the CVE is "REJECTED", "RESERVED", or "DUPLICATE", classify it as "IT Vulnerability".
-- "Automotive Vulnerability" → anything directly related to vehicles or in-vehicle systems (e.g., ECUs, infotainment, headunits, CAN bus, telematics, sensors, EV charging) or automotive manufacturing equipment.
-- "IT Vulnerability" → general software, OS, servers, enterprise systems.
-- "Web Application Vulnerability" → websites, APIs, web frameworks.
-- "IoT Vulnerability" → consumer or embedded smart devices (non-automotive).
-- "Network Vulnerability" → routers, switches, VPNs, or network protocols.
-- "Operational Technology (OT) Vulnerability" → industrial control or automation systems not specific to automotive.
-- If the record is related to Linux, classify as "Automotive Vulnerability" only if it's clearly related to automotive systems.
+Classification rules (semantic, not keyword-based):
 
-Return output strictly in JSON format as:
+1. "Automotive Vulnerability" ONLY if the vulnerability clearly affects
+   systems that operate inside vehicles or automotive infrastructure,
+   such as in-vehicle communication, ECUs, infotainment/IVI, telematics,
+   ADAS functions, or any component directly involved in vehicle operation or safety.
+
+2. Vulnerabilities involving mobile operating systems, smartphone features,
+   general embedded chipsets, audio/camera/display drivers, SoCs, kernel 
+   memory bugs, generic firmware logic, cloud services, websites, APIs,
+   or consumer IoT devices are NOT automotive unless the description
+   explicitly states that the affected component is used in a vehicle system.
+
+3. If the description contains "REJECTED", "RESERVED", or "DUPLICATE",
+   classify it as "IT Vulnerability".
+
+4. Ambiguous descriptions are NEVER classified as automotive. The model
+   must default to a non-automotive label unless the automotive context
+   is explicit and undeniable.
+
+Return only JSON in this format:
 [
-  {{ "cve_id": "CVE-XXXX-YYYY", "label": "Automotive Vulnerability" }},
-  {{ "cve_id": "CVE-XXXX-ZZZZ", "label": "IT Vulnerability" }}
+  {{ "cve_id": "CVE-XXXX-YYYY", "label": "..." }},
+  {{ "cve_id": "CVE-XXXX-ZZZZ", "label": "..." }}
 ]
 
 Descriptions:
