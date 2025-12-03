@@ -32,7 +32,7 @@ const brandLogos = {
   honda: "assets/images/hondalogo.png",
   volkswagen: "assets/images/volkswagen.png",
   bmw: "assets/images/bmw.png",
-  // nissan: "assets/images/nissan.png",
+  nissan: "assets/images/nissan.png",
   mercedesbenz: "assets/images/mercedesbenz.png",
   audi: "assets/images/audi.png",
   chevrolet: "assets/images/chevrolet.png",
