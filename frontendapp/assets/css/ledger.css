@@ -73,8 +73,7 @@ h3 {
 
 .table-fixed th:nth-child(3),
 .table-fixed td:nth-child(3) {
-  width: 150px; /* Published Date */
-  text-align: center;
+  width: 100px; /* Published Date */
 }
 
 .table tr:hover {

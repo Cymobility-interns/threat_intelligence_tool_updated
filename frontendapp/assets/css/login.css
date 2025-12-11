@@ -23,7 +23,7 @@
 
 
 body {
-  background: url('../images/cycar.jpg') no-repeat center center fixed;
+  background: url('../images/login.jpg') no-repeat center center fixed;
   background-size: contain;
   background-size: 100% 100%;
   color: #FFFFFF;
@@ -44,7 +44,7 @@ body {
   padding: 80px;                  
   /* border-radius: 12px; */
   max-width: 500px;               
-  min-height: 500px;              
+  min-height: 400px;              
   margin: 50px auto;
   text-align: center;
 }
