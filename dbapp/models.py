@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func, Date, DateTime
+from sqlalchemy import Column, Integer, String, Text, Float, TIMESTAMP, func, Date, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 from dbapp.database import Base
 
@@ -20,6 +20,7 @@ class Vulnerability(Base):
     updated_at = Column(
         TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    processed = Column(Boolean, nullable=False, server_default="false")
 
     
 
@@ -29,7 +30,7 @@ class SyncState(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     source = Column(String, nullable=False, unique=True)   # e.g., "NVD"
     # last_synced = Column(TIMESTAMP(timezone=True), nullable=True)
-    last_synced = Column(Date, nullable=True)
+    last_synced = Column(DateTime(timezone=True), nullable=True)
     last_run = Column(DateTime(timezone=True), nullable=True)
 
 
@@ -52,6 +53,7 @@ class ClassifiedVulnerability(Base):
     updated_at = Column(
         TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+    processed = Column(Boolean, nullable=False, server_default="false")
 
 
 

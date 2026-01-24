@@ -140,14 +140,20 @@ def fetch_cves_custom(start_date: str, end_date: str):
 
         # --- Log progress in sync_state ---
         sync_state = session.query(SyncState).filter_by(source="NVD").first()
+
         if not sync_state:
-            sync_state = SyncState(source="NVD", last_synced=chunk_end)
+            sync_state = SyncState(
+                source="NVD",
+                last_synced=chunk_end,
+                last_run=datetime.now(timezone.utc),
+            )
             session.add(sync_state)
         else:
-            sync_state.last_synced = chunk_end.date()
+            sync_state.last_synced = chunk_end
             sync_state.last_run = datetime.now(timezone.utc)
 
         session.commit()
+
 
 
     session.close()
@@ -156,4 +162,4 @@ def fetch_cves_custom(start_date: str, end_date: str):
 
 if __name__ == "__main__":
     # Example usage → change dates as needed
-    fetch_cves_custom("2024-01-01", "2024-12-31")
+    fetch_cves_custom("2015-01-01", "2015-12-31")

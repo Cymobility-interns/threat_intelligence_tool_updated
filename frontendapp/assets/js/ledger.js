@@ -176,7 +176,15 @@ function renderPagination() {
 // Entry: render vulnerabilities (with optional filtering)
 // -----------------------------
 export function renderVulnerabilities(data) {
-  const filter = new URLSearchParams(window.location.search).get("filter");
+  // const filter = new URLSearchParams(window.location.search).get("filter");
+  let filter = new URLSearchParams(window.location.search).get("filter");
+  console.log("URL filter received:", filter);
+  const originalFilter = filter;  // keep original for debugging
+
+  if (filter) {
+      filter = filter.toLowerCase().replace(/-/g, "").replace(/\s+/g, "");
+  }
+
 
   if (filter && filter !== "Others") {
 
@@ -188,16 +196,23 @@ export function renderVulnerabilities(data) {
       vul.ecu_name || ""
     ];
 
-    // Special handling ONLY for Wi-Fi
-    if (filter === "Wi-Fi") {
+    // UNIVERSAL WIFI MATCHER — works for wifi, wi-fi, wi fi, WiFi, WI-FI...
+    if (originalFilter.toLowerCase().includes("wi")) {
       return fields.some(text => {
-        const t = text.toLowerCase().replace(/-/g, "");  // remove hyphens
-        return t.includes("wifi");   // match wifi, wi-fi, WiFi, WI-FI
+        const t = text.toLowerCase().replace(/-/g, "").replace(/\s+/g, "");
+        return t.includes("wifi");
       });
     }
 
+
     // NORMAL logic for CAN, LIN, Ethernet, Bluetooth, etc.
-    return fields.some(text => text.includes(filter));
+    const normalize = (str) =>
+    str.toLowerCase().replace(/[\s\-_]/g, "");
+
+  return fields.some(text =>
+    normalize(text).includes(normalize(filter))
+  );
+
   })
   
   } else if (filter === "Others") {
@@ -219,8 +234,14 @@ export function renderVulnerabilities(data) {
   );
 
   vulnerabilitiesData = Array.isArray(data) ? data : [];
-  const savedPage = parseInt(sessionStorage.getItem('ledgerCurrentPage')) || 1;
-  currentPage = savedPage;
+  
+  if (filter) {
+      currentPage = 1;   // always start from page 1 for filtered results
+  } else {
+      const savedPage = parseInt(sessionStorage.getItem('ledgerCurrentPage')) || 1;
+      currentPage = savedPage;
+  }
+
   renderVulnerabilitiesPage(currentPage);
 
 }

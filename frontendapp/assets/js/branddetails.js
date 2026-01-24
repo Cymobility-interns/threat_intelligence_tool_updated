@@ -106,6 +106,18 @@ function loadImageAsBase64(url) {
   });
 }
 
+function sanitizeText(text) {
+  if (!text) return "";
+
+  return text
+    .replace(/→|⟶|⇒|➝|➜/g, " -> ")   // normalize arrows
+    .replace(/[’‘]/g, "'")          // smart quotes → '
+    .replace(/[“”]/g, '"')          // double quotes → "
+    .replace(/—|–/g, "-")           // long dashes → -
+    .replace(/\s+/g, " ")           // clean spacing
+    .trim();
+}
+
 // -----------------------------
 // Helper: format ISO date to DD-MM-YYYY
 // -----------------------------
@@ -389,6 +401,8 @@ downloadBtn.addEventListener("click", async () => {
         let value = data[key];
         if (key === "cve_id" && !value) value = data.id ? `ID: ${data.id}` : "Not Available";
         if (!value) value = "Not Available";
+
+        value = sanitizeText(String(value));
 
         const label = labelOverrides[key] || key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
         return [label, String(value)];

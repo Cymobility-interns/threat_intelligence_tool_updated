@@ -63,6 +63,30 @@ app.add_middleware(
     https_only=False    # must be False if you’re on HTTP.
 )
 
+import re
+from sqlalchemy import func
+
+def normalize_sql(field):
+    """
+    Normalizes database text for flexible matching:
+    - lower case
+    - removes hyphens, spaces, underscores
+    - removes unicode dashes
+    """
+    return func.replace(
+        func.replace(
+            func.replace(
+                func.replace(
+                    func.lower(field),
+                    "-", ""
+                ),
+                " ", ""
+            ),
+            "_", ""
+        ),
+        "–", ""  # optional: remove en-dash
+    )
+
 
 @app.get("/")
 def read_root():
@@ -83,7 +107,9 @@ def get_vulnerabilities(
 ):
     query = db.query(AutomotiveVulnerability)
 
-    # Date filter
+    # -------------------------
+    # DATE FILTER
+    # -------------------------
     if from_date and to_date:
         try:
             from_dt = datetime.strptime(from_date, "%Y-%m-%d")
@@ -92,34 +118,61 @@ def get_vulnerabilities(
                 AutomotiveVulnerability.published_date.between(from_dt, to_dt)
             )
         except ValueError:
-            pass  # ignore bad dates, return all
+            pass
 
-    # Search filter
+    # -------------------------
+    # SEARCH FILTER
+    # -------------------------
     if search:
-        search_like = f"%{search}%"
-        query = query.filter(
-            or_(
-                AutomotiveVulnerability.cve_id.ilike(search_like),
-                AutomotiveVulnerability.title.ilike(search_like),
-                AutomotiveVulnerability.description.ilike(search_like),
-                AutomotiveVulnerability.company.ilike(search_like),
-                AutomotiveVulnerability.interface.ilike(search_like),
-                AutomotiveVulnerability.ecu_name.ilike(search_like),
-            )
-        )
 
-    # CVE Type filter
+        # =============================================
+        # OPTION-D CASE SENSITIVE WORD MATCH FOR "CAN"
+        # =============================================
+        if search == "CAN":
+            # Postgres regex word boundary: \m or \y
+            regex = r"(?<!ZDI-)\yCAN\y"
+
+            query = query.filter(
+                or_(
+                    AutomotiveVulnerability.title.op("~")(regex),
+                    AutomotiveVulnerability.description.op("~")(regex),
+                    AutomotiveVulnerability.interface.op("~")(regex),
+                    AutomotiveVulnerability.ecu_name.op("~")(regex),
+                )
+            )
+
+        # =============================================
+        # NORMAL SEARCH FOR ALL OTHER TERMS (KEEP YOUR LOGIC)
+        # =============================================
+        else:
+            search_norm = re.sub(r"[-_\s]", "", search.lower())
+
+            query = query.filter(
+                or_(
+                    normalize_sql(AutomotiveVulnerability.title).contains(search_norm),
+                    normalize_sql(AutomotiveVulnerability.description).contains(search_norm),
+                    normalize_sql(AutomotiveVulnerability.company).contains(search_norm),
+                    normalize_sql(AutomotiveVulnerability.interface).contains(search_norm),
+                    normalize_sql(AutomotiveVulnerability.ecu_name).contains(search_norm),
+                    normalize_sql(AutomotiveVulnerability.cve_id).contains(search_norm),
+                )
+            )
+
+    # -------------------------
+    # CVE TYPE FILTER
+    # -------------------------
     if cve_type == "CVE":
         query = query.filter(AutomotiveVulnerability.cve_id.like("CVE-%"))
     elif cve_type == "Non-CVE":
         query = query.filter(
             or_(
-              AutomotiveVulnerability.cve_id == None,
-              AutomotiveVulnerability.cve_id == "Not Available",
+                AutomotiveVulnerability.cve_id == None,
+                AutomotiveVulnerability.cve_id == "Not Available",
             )
         )
 
     return query.all()
+
 
 
 

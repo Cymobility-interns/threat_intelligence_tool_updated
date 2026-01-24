@@ -1,44 +1,73 @@
+#!/usr/bin/env python3
+"""
+Refactored Grok-based automotive data enhancer (robust JSON parsing).
+
+- Prompt is unchanged from your provided prompt (kept exactly).
+- Improved JSON parsing fallback (balanced-brace extractor).
+- Uses "Unknown" as the default fill value for missing fields.
+- CLI: --dry-run and --batch-size supported.
+
+Usage:
+    python refactored_generate_fixed.py
+    python refactored_generate_fixed.py --dry-run --batch-size 5
+"""
+
 import os
-import json5  # <- using json5 for robust JSON parsing
+import time
+import argparse
+from typing import List, Dict, Any, Tuple, Optional
+import json5
+from openai import OpenAI
 import psycopg2
 from psycopg2.extras import execute_values
-from openai import OpenAI
 from dotenv import load_dotenv
+import sys
+import traceback
 
-# ---------------- LOAD ENV ----------------
 load_dotenv()
 
+# ---------------- CONFIG ----------------
 DB_NAME = os.getenv("PG_DB", "vuldb")
 DB_USER = os.getenv("PG_USER", "postgres")
 DB_PASS = os.getenv("PG_PASS", "123456")
-DB_HOST = os.getenv("PG_HOST", "192.168.0.28")
+DB_HOST = os.getenv("PG_HOST", "localhost")
 DB_PORT = os.getenv("PG_PORT", "5432")
 
 GROK_API_KEY = os.getenv("XAI_API_KEY")
 if not GROK_API_KEY:
-    raise RuntimeError("GROK_API_KEY (XAI_API_KEY) not set in environment")
+    raise RuntimeError("XAI_API_KEY (GROK_API_KEY) not set in environment")
 
-# ---------------- INIT GROK CLIENT ----------------
-client = OpenAI(
-    api_key=GROK_API_KEY,
-    base_url="https://api.x.ai/v1"
-)
+# Client
+client = OpenAI(api_key=GROK_API_KEY, base_url="https://api.x.ai/v1")
 
-# ---------------- PROMPT TEMPLATE ----------------
+# ---------------- PROMPT (UNCHANGED) ----------------
 PROMPT_TEMPLATE = """
-You are a cybersecurity AI for automotive vulnerabilities.
-From the numbered descriptions below, generate a JSON array where each element corresponds to the same number, containing exactly 16 fields.
+You are an Automotive Cybersecurity Threat Analysis AI.
+For each numbered automotive vulnerability description, generate one JSON object
+with exactly the following 16 fields:
 
-Rules:
-- Output only valid JSON array (no markdown).
-- Each element must have all 16 fields.
-- Use "Unknown" for missing data.
-- attack_path: 1–3 numbered steps from attacker entry to impact (how, action, result).
-- level_of_attack: One of "Physical", "Local", "Remote", "Network-based", "Supply-chain" or other suitable terms.
-- cia: Confidentiality, Integrity, Availability, or combinations.
-- impact: Negligible, Moderate, Major, Severe.
-- feasibility: Low, Medium, High.
-- Use automotive context (ECUs, CAN, infotainment, sensors, etc.).
+["company","title","attack_path","interface","tools_used","types_of_attack",
+ "level_of_attack","damage_scenario","cia","impact","feasibility",
+ "countermeasures","model_name","model_year","ecu_name","library_name"]
+
+Strict rules:
+- Output ONLY a valid JSON array (no markdown, no commentary).
+- Use "Unknown" when the description does not provide enough information.
+- Do NOT hallucinate automotive details. Only mention ECUs, CAN, IVI, ADAS, sensors,
+  or vehicle components when the description clearly supports it.
+- If automotive relevance is unclear, keep all automotive-specific fields
+  (model_name, model_year, ecu_name, library_name) as "Unknown".
+
+Field rules:
+- attack_path = 1–3 steps (attacker entry(attack surface) → action → impact).
+- level_of_attack = one of: Physical, Local, Remote, Network-based,
+  Supply-chain, or Unknown.
+- cia = any appropriate subset of: Confidentiality, Integrity, Availability.
+  Use only what the description actually justifies.
+- impact = Negligible, Moderate, Major, or Severe.
+- feasibility = Low, Medium, or High.
+- damage_scenario = concise real-world vehicle/system safety impact.
+- countermeasures = practical, cybersecurity-focused mitigations.
 
 Numbered Input Descriptions:
 {description_block}
@@ -46,10 +75,11 @@ Numbered Input Descriptions:
 Output JSON Array:
 [
   {{
-    "company": "", "title": "", "attack_path": "", "interface": "", "tools_used": "",
-    "types_of_attack": "", "level_of_attack": "", "damage_scenario": "", "cia": "",
-    "impact": "", "feasibility": "", "countermeasures": "", "model_name": "",
-    "model_year": "", "ecu_name": "", "library_name": ""
+    "company": "", "title": "", "attack_path": "", "interface": "",
+    "tools_used": "", "types_of_attack": "", "level_of_attack": "",
+    "damage_scenario": "", "cia": "", "impact": "", "feasibility": "",
+    "countermeasures": "", "model_name": "", "model_year": "",
+    "ecu_name": "", "library_name": ""
   }}
 ]
 """
@@ -60,128 +90,301 @@ EXPECTED_FIELDS = [
     "countermeasures", "model_name", "model_year", "ecu_name", "library_name"
 ]
 
-# ---------------- GROK CALL ----------------
-def generate_fields_batch(descriptions: list[str]) -> list[dict]:
-    """Call Grok once for multiple descriptions and return a list of dicts."""
-    # Build numbered input block
-    description_block = "\n".join([f"{i+1}. {desc}" for i, desc in enumerate(descriptions)])
-    prompt = PROMPT_TEMPLATE.format(description_block=description_block)
-    try:
-        response = client.chat.completions.create(
-            model="grok-3-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=2000  # enough room for multiple JSON objects
-        )
-        raw_output = response.choices[0].message.content.strip()
+# Runtime configs (CLI can override batch size and dry-run)
+DEFAULT_BATCH_SIZE = 5
+MAX_RETRIES = 4
+INITIAL_BACKOFF = 1.0
+MAX_BACKOFF = 30.0
+TEMPERATURE = 0.3
+MAX_TOKENS = 2000
 
-        # Clean formatting
-        if raw_output.startswith("```"):
-            raw_output = raw_output.strip("`").replace("json", "")
+# ---------------- Helpers ----------------
+def make_description_block(descriptions: List[str]) -> str:
+    return "\n".join(f"{i+1}. {desc}" for i, desc in enumerate(descriptions))
 
-        # Parse JSON array
+
+def call_grok_with_retry(prompt: str) -> Optional[str]:
+    backoff = INITIAL_BACKOFF
+    for attempt in range(1, MAX_RETRIES + 1):
         try:
-            data_list = json5.loads(raw_output)
-        except Exception as e:
-            print(f"❌ Failed to parse JSON5 batch: {e}")
-            data_list = []
+            resp = client.chat.completions.create(
+                model="grok-3-mini",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=TEMPERATURE,
+                max_tokens=MAX_TOKENS,
+            )
+            raw = resp.choices[0].message.content
+            if isinstance(raw, dict):
+                # some SDKs return structure; convert safely
+                raw = raw.get("content", "") if raw else ""
+            return (raw or "").strip()
+        except Exception as exc:
+            print(f" Grok call failed (attempt {attempt}/{MAX_RETRIES}): {exc}")
+            if attempt == MAX_RETRIES:
+                print(" Max retries reached for Grok call.")
+                return None
+            time.sleep(min(backoff, MAX_BACKOFF))
+            backoff *= 2.0
+    return None
 
-        # Ensure list shape and fill defaults
-        cleaned = []
-        for data in data_list:
-            obj = {}
-            for field in EXPECTED_FIELDS:
-                val = data.get(field, "unknown") if isinstance(data, dict) else "unknown"
-                obj[field] = val if val else "unknown"
-            cleaned.append(obj)
 
-        return cleaned
+def extract_json_objects_via_balanced_braces(text: str) -> List[str]:
+    """
+    Extract JSON object substrings by scanning for balanced braces.
+    This captures {...} occurrences even if the surrounding output isn't a valid array.
+    Returns list of object strings (including braces).
+    """
+    objs = []
+    stack = 0
+    start = None
+    for i, ch in enumerate(text):
+        if ch == '{':
+            if stack == 0:
+                start = i
+            stack += 1
+        elif ch == '}':
+            if stack > 0:
+                stack -= 1
+                if stack == 0 and start is not None:
+                    objs.append(text[start:i+1])
+                    start = None
+    return objs
 
-    except Exception as e:
-        print(f"❌ Model batch call failed: {e}")
+
+def parse_json5_array(raw: str) -> List[Dict[str, Any]]:
+    """
+    Robust parsing of Grok raw output:
+    1) Try json5.loads(raw)
+    2) If fails, try to extract substring between first '[' and last ']' and parse
+    3) If still fails, extract individual {...} objects by balanced-brace scan and parse each
+    Returns list of dicts (may be empty).
+    """
+    if not raw:
         return []
+    # 1) direct parse
+    try:
+        parsed = json5.loads(raw)
+        if isinstance(parsed, list):
+            return parsed
+        # if it's a dict (single object), wrap it
+        if isinstance(parsed, dict):
+            return [parsed]
+    except Exception:
+        pass
+
+    # 2) try array substring
+    try:
+        first = raw.find('[')
+        last = raw.rfind(']')
+        if first != -1 and last != -1 and last > first:
+            sub = raw[first:last+1]
+            parsed = json5.loads(sub)
+            if isinstance(parsed, list):
+                return parsed
+            if isinstance(parsed, dict):
+                return [parsed]
+    except Exception:
+        pass
+
+    # 3) fallback: extract {...} groups using balanced braces
+    objects = extract_json_objects_via_balanced_braces(raw)
+    results = []
+    for obj_text in objects:
+        try:
+            parsed = json5.loads(obj_text)
+            if isinstance(parsed, dict):
+                results.append(parsed)
+        except Exception:
+            # best-effort: attempt to fix simple trailing commas
+            cleaned = obj_text.strip().rstrip(', \n\r')
+            try:
+                parsed = json5.loads(cleaned)
+                if isinstance(parsed, dict):
+                    results.append(parsed)
+            except Exception:
+                # can't parse this object - skip but save raw for debugging
+                continue
+    return results
 
 
-# ---------------- DB INSERT/UPDATE ----------------
-def insert_and_update(cur, conn, batch_data):
-    """Insert generated data and mark rows as processed."""
-    if not batch_data:
+def normalize_result_fields(data: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Ensure all EXPECTED_FIELDS exist and return string values.
+    Use 'Unknown' for missing/empty values (capitalized per your instruction).
+    """
+    out: Dict[str, str] = {}
+    for k in EXPECTED_FIELDS:
+        val = data.get(k) if isinstance(data, dict) else None
+        if val is None:
+            out[k] = "Unknown"
+        else:
+            # convert lists/dicts to JSON string, primitives to str
+            if isinstance(val, (dict, list)):
+                try:
+                    out[k] = json5.dumps(val)
+                except Exception:
+                    out[k] = str(val)
+            else:
+                s = str(val).strip()
+                out[k] = s if s else "Unknown"
+    return out
+
+
+# ---------------- DB helpers ----------------
+def connect_db():
+    return psycopg2.connect(
+        dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT
+    )
+
+
+def fetch_unprocessed_rows(conn, limit: int) -> List[Tuple]:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, cve_id, source, description, published_date, cvss_score "
+            "FROM classified_vulnerabilities WHERE processed = false ORDER BY id ASC LIMIT %s;",
+            (limit,)
+        )
+        rows = cur.fetchall()
+    return rows
+
+
+def insert_batch_and_mark_processed(conn, rows_with_fields: List[Tuple]):
+    if not rows_with_fields:
+        return 0
+    with conn.cursor() as cur:
+        insert_query = """
+        INSERT INTO automotive_vulnerabilities (
+            id, cve_id, source, description, published_date, cvss_score,
+            company, title, attack_path, interface, tools_used, types_of_attack,
+            level_of_attack, damage_scenario, cia, impact, feasibility,
+            countermeasures, model_name, model_year, ecu_name, library_name
+        ) VALUES %s
+        ON CONFLICT (id) DO NOTHING;
+        """
+        execute_values(cur, insert_query, rows_with_fields)
+        ids = [r[0] for r in rows_with_fields]
+        cur.execute("UPDATE classified_vulnerabilities SET processed = true WHERE id = ANY(%s);", (ids,))
+    conn.commit()
+    return len(rows_with_fields)
+
+
+# ---------------- Main pipeline ----------------
+def generate_fields_for_batch(descriptions: List[str]) -> List[Dict[str, str]]:
+    description_block = make_description_block(descriptions)
+    prompt = PROMPT_TEMPLATE.format(description_block=description_block)
+    raw = call_grok_with_retry(prompt)
+    if raw is None:
+        print(" Grok returned no output (None).")
+        return []
+    # Save raw for debug if parse fails later
+    parsed = parse_json5_array(raw)
+    if not parsed:
+        # Save debug file for investigation
+        try:
+            ts = int(time.time())
+            debug_file = f"grok_debug_{ts}.txt"
+            with open(debug_file, "w", encoding="utf-8") as f:
+                f.write(raw)
+            print(f" Parsing returned no objects; raw output saved to {debug_file}")
+        except Exception:
+            pass
+    normalized = [normalize_result_fields(p) for p in parsed]
+    return normalized
+
+
+def run_pipeline(batch_size: int = DEFAULT_BATCH_SIZE, dry_run: bool = False):
+    print(f" Starting pipeline (BATCH_SIZE={batch_size}, DRY_RUN={dry_run})")
+    try:
+        conn = connect_db()
+    except Exception as e:
+        print(f" DB connection failed: {e}")
         return
 
-    insert_query = """
-    INSERT INTO automotive_vulnerabilities (
-        id, cve_id, source, description, published_date, cvss_score,
-        company, title, attack_path, interface, tools_used, types_of_attack,
-        level_of_attack, damage_scenario, cia, impact, feasibility,
-        countermeasures, model_name, model_year, ecu_name, library_name
-    ) VALUES %s
-    """
-    execute_values(cur, insert_query, batch_data)
-
-    ids = [row[0] for row in batch_data]
-    cur.execute(
-        "UPDATE classified_vulnerabilities SET processed = true WHERE id = ANY(%s);",
-        (ids,)
-    )
-    conn.commit()
-    print(f"✅ Inserted {len(batch_data)} rows & updated processed flags.")
-
-# ---------------- MAIN PIPELINE ----------------
-def main():
+    total_processed = 0
     try:
-        with psycopg2.connect(
-            dbname=DB_NAME, user=DB_USER, password=DB_PASS,
-            host=DB_HOST, port=DB_PORT
-        ) as conn:
-            with conn.cursor() as cur:
-                cur.execute("""
-                    SELECT id, cve_id, source, description, published_date, cvss_score
-                    FROM classified_vulnerabilities
-                    WHERE processed = false;
-                """)
-                rows = cur.fetchall()
-                print(f"ℹ️    Fetched {len(rows)} unprocessed rows.")
+        while True:
+            rows = fetch_unprocessed_rows(conn, limit=batch_size)
+            if not rows:
+                print(" No unprocessed rows found. Done.")
+                break
 
-                all_data = []
+            ids = [r[0] for r in rows]
+            print(f"\n Processing batch of {len(rows)} rows (IDs: {ids})")
+            descriptions = [r[3] or "Unknown" for r in rows]
 
-                BATCH_SIZE = 5  # tune this (5–10 is optimal)
-                for i in range(0, len(rows), BATCH_SIZE):
-                    batch_rows = rows[i:i + BATCH_SIZE]
-                    descriptions = [r[3] for r in batch_rows]  # description field
-                    cve_ids = [r[1] for r in batch_rows]
+            try:
+                results = generate_fields_for_batch(descriptions)
+            except Exception as exc:
+                print(f" Unexpected error during generation: {exc}")
+                traceback.print_exc()
+                results = []
 
-                    print(f"\n🔎 Processing batch {i//BATCH_SIZE + 1} ({len(batch_rows)} records)...")
-                    results = generate_fields_batch(descriptions)
+            if not results:
+                print(" No results returned for this batch. Skipping these rows for now.")
+                # optional: implement retry counter per-row in DB to avoid infinite loop
+                time.sleep(1)
+                continue
 
-                    if not results:
-                        print("⚠️ No results from Grok for this batch — skipping.")
-                        continue
+            # Safety: pad/truncate to match rows length
+            if len(results) < len(rows):
+                print(f" Mismatch: got {len(results)} results for {len(rows)} rows. Padding with Unknown objects.")
+                for _ in range(len(rows) - len(results)):
+                    results.append({k: "Unknown" for k in EXPECTED_FIELDS})
+            elif len(results) > len(rows):
+                results = results[:len(rows)]
+
+            # Build rows for DB insert
+            rows_to_insert = []
+            for row, res in zip(rows, results):
+                id_val, cve_id, source, description, published_date, cvss_score = row
+                nf = normalize_result_fields(res)
+                rows_to_insert.append((
+                    id_val, cve_id, source, description, published_date, cvss_score,
+                    nf["company"], nf["title"], nf["attack_path"], nf["interface"],
+                    nf["tools_used"], nf["types_of_attack"], nf["level_of_attack"],
+                    nf["damage_scenario"], nf["cia"], nf["impact"], nf["feasibility"],
+                    nf["countermeasures"], nf["model_name"], nf["model_year"],
+                    nf["ecu_name"], nf["library_name"]
+                ))
+
+            if dry_run:
+                print("DRY RUN — sample rows that would be inserted (first 3):")
+                for r in rows_to_insert[:3]:
+                    print(r)
+                total_processed += len(rows_to_insert)
+                # In dry-run we do not update DB, but continue to next batch
+                continue
+
+            try:
+                inserted = insert_batch_and_mark_processed(conn, rows_to_insert)
+                total_processed += inserted
+                print(f" Batch complete: inserted {inserted} records. Total processed so far: {total_processed}")
+            except Exception as exc:
+                print(f" DB insert failed for this batch: {exc}")
+                traceback.print_exc()
+                # safety: do not mark processed if insert failed; move on or retry later
+                time.sleep(1)
+                continue
+
+            time.sleep(0.5)
+
+    except KeyboardInterrupt:
+        print(" Interrupted by user. Exiting gracefully.")
+    except Exception as exc:
+        print(f" Pipeline error: {exc}")
+        traceback.print_exc()
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+    print(" Pipeline finished.")
 
 
-                    # Handle mismatch safety
-                    if len(results) != len(batch_rows):
-                        print(f"⚠️ Mismatch: expected {len(batch_rows)}, got {len(results)} — filling unknowns.")
-                        results = results + [{field: "unknown" for field in EXPECTED_FIELDS}] * (len(batch_rows) - len(results))
-
-                    for row, fields in zip(batch_rows, results):
-                        id_val, cve_id, source, description, published_date, cvss_score = row
-                        all_data.append((
-                            id_val, cve_id, source, description, published_date, cvss_score,
-                            fields["company"], fields["title"], fields["attack_path"], fields["interface"],
-                            fields["tools_used"], fields["types_of_attack"], fields["level_of_attack"],
-                            fields["damage_scenario"], fields["cia"], fields["impact"], fields["feasibility"],
-                            fields["countermeasures"], fields["model_name"], fields["model_year"],
-                            fields["ecu_name"], fields["library_name"]
-                        ))
-
-                    # Optional: commit after each batch to avoid losing progress
-                    insert_and_update(cur, conn, all_data)
-                    all_data = []  # reset after inserting
-
-
-    except Exception as e:
-        print(f"❌ Error in pipeline: {e}")
-
-# ---------------- RUN ----------------
+# ---------------- CLI ----------------
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(prog="refactored_generate_fixed.py", description="Refactored Grok pipeline (fixed)")
+    parser.add_argument("--dry-run", action="store_true", help="Do not write to DB; just simulate")
+    parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help="Batch size (default 5)")
+    args = parser.parse_args()
+    run_pipeline(batch_size=args.batch_size, dry_run=args.dry_run)
