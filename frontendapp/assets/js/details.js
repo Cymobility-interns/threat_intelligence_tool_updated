@@ -118,6 +118,17 @@ function loadImageAsBase64(url) {
   });
 }
 
+function sanitizeText(text) {
+  if (!text) return "";
+
+  return text
+    .replace(/→|⟶|⇒|➝|➜/g, " -> ")   // normalize arrows
+    .replace(/[’‘]/g, "'")          // smart quotes → '
+    .replace(/[“”]/g, '"')          // double quotes → "
+    .replace(/—|–/g, "-")           // long dashes → -
+    .replace(/\s+/g, " ")           // clean spacing
+    .trim();
+}
 
 document.getElementById("download-btn").addEventListener("click", async () => {
   const data = await fetchDetails(cveParam);
@@ -163,6 +174,8 @@ document.getElementById("download-btn").addEventListener("click", async () => {
       let value = data[key];
       if (key === "cve_id" && !value) value = data.id ? `ID: ${data.id}` : "Not Available";
       if (!value) value = "Not Available";
+
+      value = sanitizeText(String(value));
 
       // Use override label if available, else fallback to auto format
       const label = labelOverrides[key] || key.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());

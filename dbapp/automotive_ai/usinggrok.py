@@ -171,7 +171,7 @@ Descriptions:
             try:
                 parsed = json.loads(output)
             except json.JSONDecodeError:
-                print(f"⚠️ JSON parse failed, fallback to line parsing for batch {i//sub_batch_size+1}")
+                print(f" JSON parse failed, fallback to line parsing for batch {i//sub_batch_size+1}")
                 parsed = []
                 for line in output.splitlines():
                     match = re.match(r".*?(CVE-\d{4}-\d+).*?:\s*(.+)", line)
@@ -187,12 +187,12 @@ Descriptions:
 
                 if label.lower().startswith("automotive"):
                     automotive_records.append(rec)
-                    print(f"[AUTOMOTIVE] ID {rec['id']}, {cve_id} → {label}")
+                    print(f"[AUTOMOTIVE] ID {rec['id']}, {cve_id} => {label}")
                 else:
-                    print(f"[NON-AUTOMOTIVE] ID {rec['id']}, {cve_id} → {label}")
+                    print(f"[NON-AUTOMOTIVE] ID {rec['id']}, {cve_id} => {label}")
 
         except Exception as e:
-            print(f"❌ Batch classification failed: {e}")
+            print(f" Batch classification failed: {e}")
 
         time.sleep(0.3)  # polite pacing
 
@@ -205,7 +205,7 @@ def run_full_pipeline(batch_size=50):
     while True:
         source_rows = fetch_unprocessed_batch(batch_size=batch_size)
         if not source_rows:
-            print("✅ No unprocessed records found. Pipeline finished.")
+            print(" No unprocessed records found. Pipeline finished.")
             break
 
         print(f"\nFetched {len(source_rows)} records.")
@@ -225,7 +225,7 @@ def run_full_pipeline(batch_size=50):
 
     print("\nFinal Run Summary:")
     print(f"Fetched: {total_fetched} | Inserted: {total_inserted} | Processed: {total_processed}")
-    print("🚀 Pipeline complete.")
+    print(" Pipeline complete.")
 
 if __name__ == "__main__":
     run_full_pipeline(batch_size=50)

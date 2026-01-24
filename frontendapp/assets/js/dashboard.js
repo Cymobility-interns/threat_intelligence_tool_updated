@@ -9,26 +9,57 @@ async function getInterfaceCounts() {
   const counts = { CAN: 0, LIN: 0, Ethernet: 0, "Wi-Fi": 0, Bluetooth: 0 };
 
   vulnerabilities.forEach(vul => {
+
+    const fields = [
+      vul.description || "",
+      vul.interface || "",
+      vul.title || "",
+      vul.ecu_name || ""
+    ];
+
     labels.forEach(label => {
 
-      const fields = [
-        vul.description || "",
-        vul.interface || "",
-        vul.title || "",
-        vul.ecu_name || ""
-      ];
-
-      // ---- SPECIAL CASE: Wi-Fi should match wifi / WiFi / wi fi / wi-fi ----
+      // ---------------------------------------
+      // WIFI logic (already working)
+      // ---------------------------------------
       if (label === "Wi-Fi") {
         const match = fields.some(text => {
           const normalized = text.toLowerCase().replace(/-/g, "");
           return normalized.includes("wifi");
         });
-        if (match) counts[label]++;
-        return; // skip default logic
+        if (match) counts["Wi-Fi"]++;
+        return;
       }
 
-      // ---- DEFAULT (for CAN, LIN, Ethernet, Bluetooth) ----
+      // ---------------------------------------
+      // CAN PROTOCOL MATCH (Option D + ZDI Fix)
+      // ---------------------------------------
+      if (label === "CAN") {
+        const match = fields.some(text => {
+          const hasZDI = /ZDI-CAN-\d+/i.test(text);
+
+          // Remove ZDI-CAN-xxxx part from the text
+          const cleaned = text.replace(/ZDI-CAN-\d+/gi, "");
+
+          // Check if cleaned text still contains real CAN reference
+          const hasRealCAN = cleaned.includes("CAN");
+
+          // If real CAN exists → count
+          if (hasRealCAN) return true;
+
+          // If only ZDI-CAN remains → do not count
+          return false;
+        });
+
+        if (match) counts.CAN++;
+        return;
+      }
+
+
+      // ---------------------------------------
+      // DEFAULT logic for other protocols (LIN, Ethernet, Bluetooth)
+      // CASE-SENSITIVE contains()
+      // ---------------------------------------
       const match = fields.some(text => text.includes(label));
       if (match) counts[label]++;
     });
@@ -36,6 +67,7 @@ async function getInterfaceCounts() {
 
   return counts;
 }
+
 
 // Function to count vulnerabilities for Chart 2: ECU/System Distribution
 async function getECUCounts() {

@@ -23,25 +23,25 @@ def fetch_modified_cves():
     # --- Get last sync state ---
     sync_state = session.query(SyncState).filter_by(source="NVD").first()
     if not sync_state or not sync_state.last_synced:
-        print("⚠️ No previous sync found. Run custom_ingest_api first.")
+        print(" No previous sync found. Run custom_ingest_api first.")
         session.close()
         return
 
     # Assume sync_state.last_synced is a date
     start_date = sync_state.last_synced
 
-    # Convert date → datetime with UTC
-    if isinstance(start_date, date) and not isinstance(start_date, datetime):
+    # Safety check (should already be datetime after migration)
+    if not isinstance(start_date, datetime):
         start_date = datetime.combine(start_date, datetime.min.time(), tzinfo=timezone.utc)
 
-    # Add 1 second to avoid refetching the same last record
-    start_date += timedelta(seconds=1)
+    # Move cursor forward by 1 second
+    start_date = start_date.astimezone(timezone.utc) + timedelta(seconds=1)
 
     # End date is current UTC datetime
     end_date = datetime.now(timezone.utc)
 
 
-    print(f" Fetching CVEs modified from {start_date} → {end_date}")
+    print(f" Fetching CVEs modified from {start_date} to {end_date}")
 
     # Split into 120-day chunks
     date_ranges = chunk_date_ranges(start_date, end_date, chunk_size_days=120)
@@ -49,8 +49,8 @@ def fetch_modified_cves():
     total_updated = 0
 
     for i, (chunk_start, chunk_end) in enumerate(date_ranges, start=1):
-        print(f"\n🔹 Processing chunk {i}/{total_chunks} "
-              f"({chunk_start.date()} → {chunk_end.date()})")
+        print(f"\n Processing chunk {i}/{total_chunks} "
+              f"({chunk_start.date()} to {chunk_end.date()})")
 
         params = {
             "lastModStartDate": chunk_start.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
@@ -144,7 +144,7 @@ def fetch_modified_cves():
         # sync_state.last_run = datetime.now(timezone.utc)
         # session.commit()
 
-        sync_state.last_synced = chunk_end.date()
+        sync_state.last_synced = chunk_end
         sync_state.last_run = datetime.now(timezone.utc)
         session.commit()
 
