@@ -388,6 +388,29 @@ downloadBtn.addEventListener("click", async () => {
     doc.setFontSize(16);
     doc.text("Vulnerability Report", 105, 25, { align: "center" });
 
+    // Downloaded date (top-right)
+    const downloadedDate = new Date().toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+
+    // Enable opacity
+    if (doc.setGState) {
+      doc.setGState(new doc.GState({ opacity: 0.5 })); 
+    }
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`${downloadedDate}`, doc.internal.pageSize.getWidth() - 10, 15, {
+      align: "right"
+    });
+
+    // Reset opacity
+    if (doc.setGState) {
+      doc.setGState(new doc.GState({ opacity: 1 }));
+    }
+
      // Custom label overrides (Acronyms)
       const labelOverrides = {
         cve_id: "CVE ID",
