@@ -18,7 +18,7 @@ from nltk.tokenize import sent_tokenize # pyright: ignore[reportMissingImports]
 load_dotenv()
 
 DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "192.168.0.11"),
+    "host": os.getenv("DB_HOST", "localhost"),
     "port": os.getenv("DB_PORT", "5432"),
     "dbname": os.getenv("DB_NAME", "vuldb"),
     "user": os.getenv("DB_USER", "postgres"),

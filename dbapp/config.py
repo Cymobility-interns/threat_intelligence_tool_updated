@@ -6,6 +6,7 @@
 
 # settings = Settings()
 
+from pathlib import Path
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -16,7 +17,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     class Config:
-        env_file = ".env"
+        env_file = Path(__file__).parent.parent / ".env"
         extra = "ignore"
 
 settings = Settings()
