@@ -52,7 +52,7 @@ def fetch_unprocessed_batch(batch_size=50):
     sql = f"""
         SELECT id, cve_id, source, published_date, description, cvss_score
         FROM vulnerabilities
-        WHERE processed = FALSE
+        WHERE processed_automotive = FALSE
         ORDER BY id ASC
         LIMIT {batch_size}
     """
@@ -79,7 +79,7 @@ def insert_into_automotive(records):
 def mark_processed(ids):
     if not ids:
         return
-    sql = "UPDATE vulnerabilities SET processed = TRUE WHERE id = ANY(%s)"
+    sql = "UPDATE vulnerabilities SET processed_automotive = TRUE WHERE id = ANY(%s)"
     with connect_db() as conn, conn.cursor() as cur:
         cur.execute(sql, (ids,))
 

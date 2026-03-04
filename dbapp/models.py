@@ -20,7 +20,8 @@ class Vulnerability(Base):
     updated_at = Column(
         TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-    processed = Column(Boolean, nullable=False, server_default="false")
+    processed_automotive = Column(Boolean, nullable=False, server_default="false")
+    processed_iot_embedded = Column(Boolean, nullable=False, server_default="false")
 
     
 
