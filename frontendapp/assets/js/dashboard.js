@@ -128,22 +128,19 @@ async function renderInterfaceChart() {
       labels: chartLabels,
       datasets: [{
         data: chartData,
-        backgroundColor: ["#4FFAEE", "#CEF9F6", "#31A49C", "#B8BEBD", "#147A73"],
+        backgroundColor: ["#4FFAEE", "#ffffff", "#31A49C", "#B8BEBD", "#147A73"],
         borderWidth: 2,
-        borderColor: "#ffffff"
+        borderColor: "#ffffff",
+        radius: "70%"
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { 
-        legend: { 
-          position: "left", 
-          labels: { 
-            font: { weight: 'bold', size: 11 },
-            color: "#ffffff"
-          } 
-        } 
+      plugins: {
+        legend: {
+          display: false
+        }
       },
       onClick: (evt, elements) => {
         if (elements.length > 0) {
@@ -154,6 +151,8 @@ async function renderInterfaceChart() {
       }
     }
   });
+
+  generateCustomLegend(pieChart, 'interfaceLegend');
 }
 
 // Render Chart 2: ECU/System Distribution
@@ -171,20 +170,17 @@ async function renderECUChart() {
         data: chartData,
         backgroundColor: ["#FF6B9D", "#C44569", "#FFA07A", "#FA8072"],
         borderWidth: 2,
-        borderColor: "#ffffff"
+        borderColor: "#ffffff",
+        radius: "70%"
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { 
-        legend: { 
-          position: "left", 
-          labels: { 
-            font: { weight: 'bold', size: 11 },
-            color: "#ffffff"
-          } 
-        } 
+      plugins: {
+        legend: {
+          display: false
+        }
       },
       onClick: (evt, elements) => {
         if (elements.length > 0) {
@@ -195,6 +191,8 @@ async function renderECUChart() {
       }
     }
   });
+
+  generateCustomLegend(pieChart, 'ecuLegend');
 }
 
 // Render Chart 3: Protocol Distribution
@@ -212,20 +210,17 @@ async function renderProtocolChart() {
         data: chartData,
         backgroundColor: ["#FFD700", "#FFA500", "#FF8C00", "#FF7F50", "#FF6347"],
         borderWidth: 2,
-        borderColor: "#ffffff"
+        borderColor: "#ffffff",
+        radius: "70%"
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { 
-        legend: { 
-          position: "left", 
-          labels: { 
-            font: { weight: 'bold', size: 11 },
-            color: "#ffffff"
-          } 
-        } 
+      plugins: {
+        legend: {
+          display: false
+        }
       },
       onClick: (evt, elements) => {
         if (elements.length > 0) {
@@ -236,43 +231,108 @@ async function renderProtocolChart() {
       }
     }
   });
+
+  generateCustomLegend(pieChart, 'protocolLegend');
 }
 
-// Render Line Chart: Yearly Vulnerabilities Trend
+// Custom Legend Generator
+function generateCustomLegend(chart, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const labels = chart.data.labels;
+  const colors = chart.data.datasets[0].backgroundColor;
+  
+  labels.forEach((label, index) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.onclick = () => {
+      window.location.href = `ledger.html?filter=${encodeURIComponent(label)}`;
+    };
+    
+    const colorBox = document.createElement('div');
+    colorBox.className = 'legend-color';
+    colorBox.style.backgroundColor = colors[index];
+    
+    const text = document.createElement('div');
+    text.className = 'legend-label';
+    text.innerText = label;
+    
+    item.appendChild(colorBox);
+    item.appendChild(text);
+    container.appendChild(item);
+  });
+}
+
+// Render Bar Chart: Yearly Vulnerabilities Trend (stacked — CVE vs Date-Only)
 async function renderYearlyChart() {
   const vulnerabilities = await fetchVulnerabilities();
 
-  // Count vulnerabilities by year
-  const yearCounts = {};
+  // Guard: treat placeholder strings as "no cve_id"
+  function isRealCveId(val) {
+    if (!val) return false;
+    const s = String(val).trim().toLowerCase();
+    const EMPTY_VALUES = ["", "not available", "n/a", "null", "none", "undefined", "na"];
+    return !EMPTY_VALUES.includes(s);
+  }
+
+  // Separate counts: entries WITH a real cve_id vs entries WITHOUT (date-only)
+  const cveYearCounts = {};   // year derived from CVE ID string
+  const dateYearCounts = {};   // year derived from published_date (no real cve_id)
+
   vulnerabilities.forEach(vul => {
-    if (vul.published_date) {
-      const year = new Date(vul.published_date).getFullYear();
-      yearCounts[year] = (yearCounts[year] || 0) + 1;
+    if (isRealCveId(vul.cve_id)) {
+      // Has a genuine CVE ID → extract year from the ID itself
+      const match = vul.cve_id.match(/\d{4}/);
+      if (match) {
+        const year = match[0];
+        cveYearCounts[year] = (cveYearCounts[year] || 0) + 1;
+      }
+    } else if (vul.published_date) {
+      // No real CVE ID → classify by published_date year (amber bucket)
+      const parsed = new Date(vul.published_date);
+      if (!isNaN(parsed)) {
+        const year = String(parsed.getFullYear());
+        dateYearCounts[year] = (dateYearCounts[year] || 0) + 1;
+      }
     }
   });
 
-  // Sort years in ascending order
-  const years = Object.keys(yearCounts).sort((a, b) => a - b);
-  const counts = years.map(year => yearCounts[year]);
+  console.log("CVE year counts:", cveYearCounts);
+  console.log("Date-only year counts:", dateYearCounts);
+
+  // Merge all years and sort chronologically
+  const allYears = Array.from(
+    new Set([...Object.keys(cveYearCounts), ...Object.keys(dateYearCounts)])
+  ).sort((a, b) => a - b);
+
+  const cveCounts = allYears.map(y => cveYearCounts[y] || 0);
+  const dateOnlyCounts = allYears.map(y => dateYearCounts[y] || 0);
 
   const ctx = document.getElementById("yearlyChart").getContext("2d");
   new Chart(ctx, {
     type: "bar",
     data: {
-      labels: years,
-      datasets: [{
-        label: "Vulnerabilities by Year",
-        data: counts,
-        borderColor: "#00FFFF",
-        backgroundColor: "rgba(0, 255, 255, 0.2)",
-        borderWidth: 3,
-        pointBackgroundColor: "#FFD700",
-        pointBorderColor: "#00003b",
-        pointBorderWidth: 2,
-        pointRadius: 5,
-        tension: 0.4,
-        fill: true
-      }]
+      labels: allYears,
+      datasets: [
+        {
+          label: "CVE Identified",
+          data: cveCounts,
+          backgroundColor: "rgba(0, 255, 255, 0.45)",
+          borderColor: "#00FFFF",
+          borderWidth: 2,
+          stack: "vuln"
+        },
+        {
+          label: "Non CVE Identified",
+          data: dateOnlyCounts,
+          backgroundColor: "rgba(255, 179, 71, 0.75)",
+          borderColor: "#FFB347",
+          borderWidth: 2,
+          stack: "vuln"
+        }
+      ]
     },
     options: {
       responsive: true,
@@ -281,23 +341,30 @@ async function renderYearlyChart() {
         legend: {
           labels: {
             color: "#ffffff",
-            font: { weight: "bold", size: 14 }
+            font: { weight: "bold", size: 13 },
+            // Draw custom colored boxes in the legend
+            usePointStyle: false
+          }
+        },
+        tooltip: {
+          callbacks: {
+            // Show total in tooltip footer
+            footer: (items) => {
+              const total = items.reduce((sum, i) => sum + i.parsed.y, 0);
+              return `Total: ${total}`;
+            }
           }
         }
       },
       scales: {
         x: {
-          ticks: { 
-            color: "#ffffff",
-            font: { size: 12, weight: "bold" }
-          },
+          stacked: true,
+          ticks: { color: "#ffffff", font: { size: 12, weight: "bold" } },
           grid: { color: "rgba(255,255,255,0.1)" }
         },
         y: {
-          ticks: { 
-            color: "#ffffff",
-            font: { size: 12, weight: "bold" }
-          },
+          stacked: true,
+          ticks: { color: "#ffffff", font: { size: 12, weight: "bold" } },
           grid: { color: "rgba(255,255,255,0.1)" }
         }
       }
@@ -308,11 +375,34 @@ async function renderYearlyChart() {
 // Render Recent Attacks Table
 async function renderRecentAttacks() {
   const vulnerabilities = await fetchVulnerabilities();
-  
-  // Sort by published_date (most recent first) and get top 5
+
+  // Sort by CVE ID year first, fallback to published_date
   const recentAttacks = vulnerabilities
-    .filter(vul => vul.published_date)
-    .sort((a, b) => new Date(b.published_date) - new Date(a.published_date))
+    .filter(vul => vul.cve_id || vul.published_date)
+    .sort((a, b) => {
+      // Helper to extract year from cve_id or published_date
+      const getYear = (vul) => {
+        if (vul.cve_id && vul.cve_id.startsWith("CVE-")) {
+          const match = vul.cve_id.match(/CVE-(\d{4})-/);
+          if (match) return parseInt(match[1], 10);
+        }
+        if (vul.published_date) return new Date(vul.published_date).getFullYear();
+        return 0;
+      };
+
+      const yearA = getYear(a);
+      const yearB = getYear(b);
+
+      // 1. Sort by year descending
+      if (yearA !== yearB) {
+        return yearB - yearA;
+      }
+
+      // 2. If years are exactly the same, use published_date as tie-breaker (most precise)
+      const dateA = a.published_date ? new Date(a.published_date).getTime() : 0;
+      const dateB = b.published_date ? new Date(b.published_date).getTime() : 0;
+      return dateB - dateA;
+    })
     .slice(0, 5);
 
   const tableBody = document.getElementById("recentAttacksBody");
@@ -320,11 +410,11 @@ async function renderRecentAttacks() {
 
   recentAttacks.forEach(attack => {
     const row = document.createElement("tr");
-    
+
     const cveId = attack.cve_id || attack.id || "N/A";
     const title = attack.title || "Unknown";
     const attackType = attack.types_of_attack || attack.attack_type || attack.type || "N/A";
-    
+
     // Use cve_id if available, otherwise use internal-{id} format
     let urlParam;
     if (attack.cve_id) {
@@ -334,13 +424,21 @@ async function renderRecentAttacks() {
     } else {
       urlParam = "";
     }
-    
+
+    // Identifier cell:
+    //  - WITH cve_id  → teal cve-link (existing style)
+    //  - WITHOUT cve_id → amber "Not Available" + "Date Only" badge
+    const hasCveId = !!attack.cve_id;
+    const identifierCell = hasCveId
+      ? `<td><a href="details.html?cve=${encodeURIComponent(urlParam)}" class="cve-link">${cveId}</a></td>`
+      : `<td class="no-cve-id"><a href="details.html?cve=${encodeURIComponent(urlParam)}" style="color:inherit;text-decoration:none;">N/A</a><span class="date-only-badge">Date Only</span></td>`;
+
     row.innerHTML = `
-      <td><a href="details.html?cve=${encodeURIComponent(urlParam)}" class="cve-link">${cveId}</a></td>
+      ${identifierCell}
       <td>${title}</td>
       <td>${attackType}</td>
     `;
-    
+
     tableBody.appendChild(row);
   });
 }

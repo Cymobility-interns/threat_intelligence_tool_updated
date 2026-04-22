@@ -81,7 +81,7 @@ h3 {
   transition: background 0.3s;
 }
 
-/* CVE links in black */
+/* CVE links */
 a.cve-link {
   color: #55dddd;
   text-decoration: none;
@@ -90,6 +90,28 @@ a.cve-link {
 a.cve-link:hover {
   color: #4FFAEE !important;
   text-decoration: underline;
+}
+
+/* Entries WITHOUT a CVE ID — classified by published date only */
+.no-cve-id {
+  color: #FFB347 !important; /* warm amber */
+  font-style: italic;
+}
+
+/* Small badge shown next to the display value */
+.date-only-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  color: #00003B;
+  background: #FFB347;
+  border-radius: 4px;
+  vertical-align: middle;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 /* Pagination (sticky at bottom) */

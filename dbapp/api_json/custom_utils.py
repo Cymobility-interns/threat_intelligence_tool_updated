@@ -28,7 +28,9 @@ def parse_cve_item(item):
     metrics = cve.get("metrics", {})
     severity, cvss_score = None, None
     try:
-        if "cvssMetricV31" in metrics:
+        if "cvssMetricV40" in metrics:
+            metric = metrics["cvssMetricV40"][0]["cvssData"]
+        elif "cvssMetricV31" in metrics:
             metric = metrics["cvssMetricV31"][0]["cvssData"]
         elif "cvssMetricV30" in metrics:
             metric = metrics["cvssMetricV30"][0]["cvssData"]

@@ -12,66 +12,90 @@
     <div class="horizontal-menu d-flex align-items-center" id="horizontalMenu" aria-hidden="true">
       <a href="dashboard.html">Dashboard</a>
       <a href="ledger.html">Attack Ledger</a>
-      <a href="company.html">Brands</a>
+      <!-- <a href="company.html">Brands</a> -->
       <i class="bi bi-x close-icon" id="closeMenu"></i> <!-- ✅ X icon at the end -->
     </div>
   </div>
 </nav>
 
 <style>
-.navbar-custom {
-  background-color: #00003B;
-  padding: 0.5rem 2rem;
-  z-index: 1000;
-  overflow: hidden;
-}
-.menu-toggle {
-  color: white;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: 1.3rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  user-select: none;
-  transition: all 0.3s ease;
-}
-.menu-toggle i { margin-right: 4px; font-size: 1.6rem; transition: transform 0.3s ease; }
+  .navbar-custom {
+    background-color: #00003B;
+    padding: 0.5rem 2rem;
+    z-index: 1000;
+    overflow: hidden;
+  }
 
-.horizontal-menu {
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  position: absolute;
-  top: 0;
-  right: -100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  background-color: #00003B;
-  padding: 0 2rem;
-  transition: right 0.4s ease;
-}
-.horizontal-menu a, .horizontal-menu .close-icon {
-  color: #fff;
-  text-decoration: none;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-.horizontal-menu a:hover, .horizontal-menu .close-icon:hover { color: #4FFAEE; }
-.horizontal-menu.show { right: 0; }
+  .menu-toggle {
+    color: white;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    user-select: none;
+    transition: all 0.3s ease;
+  }
 
-.close-icon {
-  font-size: 1.7rem;
-  display: none; /* will appear only when menu opens */
-}
+  .menu-toggle i {
+    margin-right: 4px;
+    font-size: 1.6rem;
+    transition: transform 0.3s ease;
+  }
 
-.horizontal-menu.show .close-icon {
-  display: inline-block;
-}
+  .horizontal-menu {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    position: absolute;
+    top: 0;
+    right: -100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background-color: #00003B;
+    padding: 0 2rem;
+    transition: right 0.4s ease;
+  }
 
-@media (max-width: 576px) {
-  .horizontal-menu { flex-direction: column; align-items: flex-start; top: 100%; right: 0; width: 100%; background-color: #00003B; padding: 1rem; }
-}
+  .horizontal-menu a,
+  .horizontal-menu .close-icon {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  .horizontal-menu a:hover,
+  .horizontal-menu .close-icon:hover {
+    color: #4FFAEE;
+  }
+
+  .horizontal-menu.show {
+    right: 0;
+  }
+
+  .close-icon {
+    font-size: 1.7rem;
+    display: none;
+    /* will appear only when menu opens */
+  }
+
+  .horizontal-menu.show .close-icon {
+    display: inline-block;
+  }
+
+  @media (max-width: 576px) {
+    .horizontal-menu {
+      flex-direction: column;
+      align-items: flex-start;
+      top: 100%;
+      right: 0;
+      width: 100%;
+      background-color: #00003B;
+      padding: 1rem;
+    }
+  }
 </style>

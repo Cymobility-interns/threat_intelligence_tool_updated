@@ -124,7 +124,7 @@ def process_vulnerability(text, url="", html=""):
                 if text.strip()
                 else "No description available"
             )
-
+            
     _, cvss = classify_attack(description)
     if cvss >= 9.0:
         severity = "critical"
@@ -411,9 +411,6 @@ if __name__ == "__main__":
         "https://www.bleepingcomputer.com/news/security/steel-giant-thyssenkrupp-confirms-cyberattack-on-automotive-division/",
         "https://www.bleepingcomputer.com/news/security/popular-vehicle-gps-tracker-gives-hackers-admin-privileges-over-sms/",
         "https://www.bleepingcomputer.com/news/security/popular-vehicle-gps-tracker-gives-hackers-admin-privileges-over-sms/",
-
-
-
     ]
 
     results = []

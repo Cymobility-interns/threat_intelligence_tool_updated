@@ -33,7 +33,7 @@ LABELS = [
     "Web Application Vulnerability",
     "IoT Vulnerability",
     "Network Vulnerability",
-    "Operational Technology (OT) Vulnerability"
+    "Operational Technology (OT) Vulnerability",
     "Embedded Systems Vulnerability"
 ]
 
@@ -127,25 +127,23 @@ Classify each CVE description into one of these labels:
 
 Classification rules (semantic, not keyword-based):
 
-1. "Automotive Vulnerability" ONLY if the vulnerability clearly affects
-   systems that operate inside vehicles or automotive infrastructure,
-   such as in-vehicle communication, ECUs, infotainment/IVI, telematics,
-   ADAS functions, or any component directly involved in vehicle operation or safety.
+1. "Automotive Vulnerability" if the vulnerability affects components, 
+   protocols, or hardware used in vehicles. 
+   CRITICAL: Any mention of automotive protocols—CAN bus, CAN driver, 
+   Controller Area Network, LIN, FlexRay, BroadR-Reach, SOME/IP, 
+   DoIP, UDS, OBD-II, or IVI/Infotainment—MUST be classified 
+   as "Automotive Vulnerability" (even if it occurs in the Linux kernel).
 
-2. Vulnerabilities involving mobile operating systems, smartphone features,
-   general embedded chipsets, audio/camera/display drivers, SoCs, kernel 
-   memory bugs, generic firmware logic, cloud services, websites, APIs,
-   or consumer IoT devices are NOT automotive unless the description
-   explicitly states that the affected component is used in a vehicle system.
+2. "IoT Vulnerability" if it affects consumer or commercial smart devices
+   (cameras, smart meters, connected sensors, etc.) that are NOT automotive.
 
-3. If the description contains "REJECTED", "RESERVED", or "DUPLICATE",
+3. "Embedded Systems Vulnerability" for internal logic bugs in standalone 
+   embedded hardware, firmware, or microcontrollers.
+
+4. If the description contains "REJECTED", "RESERVED", or "DUPLICATE",
    classify it as "IT Vulnerability".
 
-4. Ambiguous descriptions are NEVER classified as automotive. The model
-   must default to a non-automotive label unless the automotive context
-   is explicit and undeniable.
-
-For all NON-automotive cases, apply the following:
+5. For all NON-automotive cases, apply the following:
 
 5. Use "IoT Vulnerability" for embedded devices that are connected to the internet,
    cloud, or external networks (e.g., smart devices, connected sensors, gateways,

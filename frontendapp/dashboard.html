@@ -1,192 +1,248 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Threat Intelligence Tool</title>
+<!DOCTYPE html>
+<html lang="en">
 
-    <link rel="icon" href="assets/images/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="assets/css/dashboard.css">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threat Intelligence Tool</title>
 
-    <style>
-      .navbar-custom { background-color: #00003B; padding: 0.5rem 1rem; }
-      .navbar-brand img { height: 40px; }
-      .nav-link { color: white; font-weight: 600; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.3s; margin: 0 0.3rem; }
-      .nav-link:hover { color: #55dddd; }
-      .navbar-toggler { border: none; }
-      .navbar-toggler-icon { filter: invert(1); }
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css?v=2">
 
-      /* User section */
-      #userSection { position: relative; display: none; }
-      #userIcon { font-size: 1.5rem; color: white; cursor: pointer; margin-left: 0.5rem; }
-      #userIcon:hover { color: #55dddd; }
-      #userDropdown { 
-        position: absolute; 
-        top: 40px; 
-        right: 0; 
-        display: none; 
-        z-index: 1000; 
-        background: #00003B; 
-        padding: 0.5rem 1rem; 
-        border-radius: 0.5rem;
-        white-space: nowrap;
-        text-align: left;
-        margin-top: 1rem;
-      }
+  <style>
+    .navbar-custom {
+      background-color: #00003B;
+      padding: 0.5rem 1rem;
+    }
 
-      #userDropdown span,
-      #userDropdown a {
-        display: block;   /* stacked vertically */
-        width: 100%;
-      }
-      #userDropdown span {
-        color: white;
-        margin-bottom: 0.5rem;
-      }
-      #userDropdown a {
-        text-align: left;
-      }
+    .navbar-brand img {
+      height: 40px;
+    }
 
-    </style>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-custom">
-      <div class="container-fluid">
-        <a class="navbar-brand text-white fw-bold" href="#">
-          <img src="assets/images/logo.png" alt="Logo">
-        </a>
+    .nav-link {
+      color: white;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s;
+      margin: 0 0.3rem;
+    }
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+    .nav-link:hover {
+      color: #55dddd;
+    }
 
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-          <ul class="navbar-nav align-items-center">
-            <li class="nav-item">
-              <a class="nav-link" id="ledgerLink" href="ledger.html">Attack Ledger</a>
-            </li>
-            <li class="nav-item">
+    .navbar-toggler {
+      border: none;
+    }
+
+    .navbar-toggler-icon {
+      filter: invert(1);
+    }
+
+    /* User section */
+    #userSection {
+      position: relative;
+      display: none;
+    }
+
+    #userIcon {
+      font-size: 1.5rem;
+      color: white;
+      cursor: pointer;
+      margin-left: 0.5rem;
+    }
+
+    #userIcon:hover {
+      color: #55dddd;
+    }
+
+    #userDropdown {
+      position: absolute;
+      top: 40px;
+      right: 0;
+      display: none;
+      z-index: 1000;
+      background: #00003B;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      white-space: nowrap;
+      text-align: left;
+      margin-top: 1rem;
+    }
+
+    #userDropdown span,
+    #userDropdown a {
+      display: block;
+      /* stacked vertically */
+      width: 100%;
+    }
+
+    #userDropdown span {
+      color: white;
+      margin-bottom: 0.5rem;
+    }
+
+    #userDropdown a {
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid">
+      <a class="navbar-brand text-white fw-bold" href="#">
+        <img src="assets/images/logo.png" alt="Logo">
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav align-items-center">
+          <li class="nav-item">
+            <a class="nav-link" id="ledgerLink" href="ledger.html">Attack Ledger</a>
+          </li>
+          <!-- <li class="nav-item">
               <a class="nav-link" id="brandsLink" href="company.html">Brands</a>
-            </li>
-            <!-- <li class="nav-item" id="loginLink">
+            </li> -->
+          <!-- <li class="nav-item" id="loginLink">
               <a class="nav-link" href="login.html">Login</a>
             </li> -->
 
-            <li class="nav-item position-relative" id="userSection">
-              <i class="fas fa-user" id="userIcon"></i>
-              <div id="userDropdown">
-                <span id="userName" class="d-block mb-2"></span>
-                <a href="#" class="btn btn-danger btn-sm d-block" id="logoutBtn">
-                  <i class="fas fa-right-from-bracket"></i> Logout
-                </a>
-              </div>
-            </li>
-          </ul>
-        </div>
+          <li class="nav-item position-relative" id="userSection">
+            <i class="fas fa-user" id="userIcon"></i>
+            <div id="userDropdown">
+              <span id="userName" class="d-block mb-2"></span>
+              <a href="#" class="btn btn-danger btn-sm d-block" id="logoutBtn">
+                <i class="fas fa-right-from-bracket"></i> Logout
+              </a>
+            </div>
+          </li>
+        </ul>
       </div>
-    </nav>
+    </div>
+  </nav>
 
   <!-- Content -->
-    <div class="dashboard-content">
+  <div class="dashboard-content">
 
-      <!-- Three Pie Charts in a Row -->
-      <div class="pie-charts-container">
-        <div class="chart-wrapper">
-          <h4>Interface Vulnerabilities</h4>
-          <canvas id="interfaceChart"></canvas>
-        </div>
-        
-        <div class="chart-wrapper">
-          <h4>ECU Vulnerabilities</h4>
-          <canvas id="ecuChart"></canvas>
-        </div>
-        
-        <div class="chart-wrapper">
-          <h4>Firmware Vulnerabilities</h4>
-          <canvas id="protocolChart"></canvas>
+    <!-- Three Pie Charts in a Row -->
+    <div class="pie-charts-container">
+      <div class="chart-wrapper">
+        <h4>Interface Vulnerabilities</h4>
+        <div class="chart-inner">
+          <div id="interfaceLegend" class="custom-legend"></div>
+          <div class="canvas-container">
+            <canvas id="interfaceChart"></canvas>
+          </div>
         </div>
       </div>
 
-      <!-- Line Chart - Full Width -->
-      <div id="linechart-section">
-        <h3>Vulnerabilities Trend Over Time</h3>
-        <canvas id="yearlyChart"></canvas>
-      </div>
-
-      <!-- Recent Attacks Table -->
-      <div class="recent-attacks-section">
-        <h3>Recent Vulnerabilities</h3>
-        <div class="table-container">
-          <table class="recent-attacks-table">
-            <thead>
-              <tr>
-                <th>CVE ID</th>
-                <th>Title</th>
-                <th>Type of Attack</th>
-              </tr>
-            </thead>
-            <tbody id="recentAttacksBody">
-              <!-- Table rows will be dynamically populated -->
-            </tbody>
-          </table>
-          <button class="read-more-btn" onclick="window.location.href='ledger.html'">Read More</button>
+      <div class="chart-wrapper">
+        <h4>ECU Vulnerabilities</h4>
+        <div class="chart-inner">
+          <div id="ecuLegend" class="custom-legend"></div>
+          <div class="canvas-container">
+            <canvas id="ecuChart"></canvas>
+          </div>
         </div>
       </div>
 
+      <div class="chart-wrapper">
+        <h4>Firmware Vulnerabilities</h4>
+        <div class="chart-inner">
+          <div id="protocolLegend" class="custom-legend"></div>
+          <div class="canvas-container">
+            <canvas id="protocolChart"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- Line Chart - Full Width -->
+    <div id="linechart-section">
+      <h3>Vulnerabilities Trend Over Time</h3>
+      <canvas id="yearlyChart"></canvas>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Recent Attacks Table -->
+    <div class="recent-attacks-section">
+      <h3>Recent Vulnerabilities</h3>
+      <div class="table-container">
+        <table class="recent-attacks-table">
+          <thead>
+            <tr>
+              <th>CVE ID</th>
+              <th>Title</th>
+              <th>Type of Attack</th>
+            </tr>
+          </thead>
+          <tbody id="recentAttacksBody">
+            <!-- Table rows will be dynamically populated -->
+          </tbody>
+        </table>
+        <button class="read-more-btn" onclick="window.location.href='ledger.html'">Read More</button>
+      </div>
+    </div>
 
-     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  </div>
 
-    <!-- Dashboard JS -->
-    <script type="module" src="assets/js/dashboard.js"></script>
-    <script type="module" src="assets/js/protected.js"></script>
 
-    <script type="module">
-      import { logoutUser } from "./assets/js/auth.js";
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-      document.addEventListener("DOMContentLoaded", () => {
-        const userSection = document.getElementById("userSection");
-        const userIcon = document.getElementById("userIcon");
-        const userDropdown = document.getElementById("userDropdown");
-        const logoutBtn = document.getElementById("logoutBtn");
-        const userName = document.getElementById("userName");
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-        // If you already have user info available (like from /me in another script)
-        // you can set it here, e.g. userName.innerText = sessionUser.name;
-        // Otherwise, just display the section.
+  <!-- Dashboard JS -->
+  <script type="module" src="assets/js/dashboard.js?v=3"></script>
+  <script type="module" src="assets/js/protected.js"></script>
 
-        if (userSection) {
-          userSection.style.display = "block";
-        }
+  <script type="module">
+    import { logoutUser } from "./assets/js/auth.js";
 
-        // Toggle dropdown visibility
-        userIcon?.addEventListener("click", () => {
-          userDropdown.style.display =
-            userDropdown.style.display === "block" ? "none" : "block";
-        });
+    document.addEventListener("DOMContentLoaded", () => {
+      const userSection = document.getElementById("userSection");
+      const userIcon = document.getElementById("userIcon");
+      const userDropdown = document.getElementById("userDropdown");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const userName = document.getElementById("userName");
 
-        // Hide dropdown when clicking outside
-        document.addEventListener("click", (e) => {
-          if (
-            userDropdown &&
-            !userDropdown.contains(e.target) &&
-            !userIcon.contains(e.target)
-          ) {
-            userDropdown.style.display = "none";
-          }
-        });
+      // If you already have user info available (like from /me in another script)
+      // you can set it here, e.g. userName.innerText = sessionUser.name;
+      // Otherwise, just display the section.
 
-        // Logout button
-        logoutBtn?.addEventListener("click", logoutUser);
+      if (userSection) {
+        userSection.style.display = "block";
+      }
+
+      // Toggle dropdown visibility
+      userIcon?.addEventListener("click", () => {
+        userDropdown.style.display =
+          userDropdown.style.display === "block" ? "none" : "block";
       });
-    </script>
 
-  </body>
-  </html>
+      // Hide dropdown when clicking outside
+      document.addEventListener("click", (e) => {
+        if (
+          userDropdown &&
+          !userDropdown.contains(e.target) &&
+          !userIcon.contains(e.target)
+        ) {
+          userDropdown.style.display = "none";
+        }
+      });
+
+      // Logout button
+      logoutBtn?.addEventListener("click", logoutUser);
+    });
+  </script>
+
+</body>
+
+</html>

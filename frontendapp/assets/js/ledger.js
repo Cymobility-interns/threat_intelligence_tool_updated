@@ -79,10 +79,20 @@ function renderVulnerabilitiesPage(page) {
 
     const title = vuln.title || vuln.summary || "Not Available";
 
+    // Determine if this entry has a real CVE ID
+    const hasCveId = !!normalizedCve;
+
+    // Build the Identifier cell content
+    // - WITH cve_id  → teal (default table color, cve-link class)
+    // - WITHOUT cve_id → amber + "Date Only" badge (classified purely by published date)
+    const identifierCell = hasCveId
+      ? `<td>${escapeHtml(displayId)}</td>`
+      : `<td class="no-cve-id">${escapeHtml(displayId)}<span class="date-only-badge">Date Only</span></td>`;
+
     const row = document.createElement("tr");
     row.classList.add("ledger-row");
     row.innerHTML = `
-      <td>${escapeHtml(displayId)}</td>
+      ${identifierCell}
       <td>${escapeHtml(title)}</td>
       <td>${escapeHtml(formattedDate)}</td>
     `;
@@ -175,101 +185,123 @@ function renderPagination() {
 // -----------------------------
 // Entry: render vulnerabilities (with optional filtering)
 // -----------------------------
-export function renderVulnerabilities(data) {
-  // const filter = new URLSearchParams(window.location.search).get("filter");
-  let filter = new URLSearchParams(window.location.search).get("filter");
-  console.log("URL filter received:", filter);
-  const originalFilter = filter;  // keep original for debugging
+export function renderVulnerabilities(data, searchTerm) {
+  // ── URL filter: only respected on FIRST load (when called from init without searchTerm)
+  // ── When called from the search button, searchTerm is passed explicitly
+  let filter = (searchTerm !== undefined)
+    ? searchTerm
+    : new URLSearchParams(window.location.search).get("filter") || "";
 
-  if (filter) {
-      filter = filter.toLowerCase().replace(/-/g, "").replace(/\s+/g, "");
+  const originalFilter = filter.trim();
+
+  // ── Normalize: lowercase + replace hyphens/underscores with SPACES.
+  // Replacing (not removing) preserves word boundaries so:
+  //   "CVE-2025-5833" → "cve 2025 5833"  (numbers become separate words)
+  //   "anti-theft"    → "anti theft"
+  const normalize = (str) =>
+    String(str || "").toLowerCase().replace(/[-_]/g, " ");
+
+  const normFilter = normalize(originalFilter).trim();
+
+  if (normFilter) {
+    // Escape any regex special characters in user input
+    const escaped = normFilter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    // \b before the term = must start at a word boundary.
+    // "hero" → matches "hero", "heroic", "hero motocorp"
+    //        → does NOT match "Cherokee" (c before h, no boundary)
+    const searchRegex = new RegExp(`\\b${escaped}`, "i");
+
+    data = data.filter(vul => {
+      // ── Full raw text (for special-case handlers that need original casing) ──
+      const rawText = [
+        vul.cve_id, vul.source, vul.company, vul.title,
+        vul.description, vul.attack_path, vul.interface,
+        vul.tools_used, vul.types_of_attack, vul.level_of_attack,
+        vul.damage_scenario, vul.cia, vul.impact, vul.feasibility,
+        vul.countermeasures, vul.model_name, vul.model_year,
+        vul.ecu_name, vul.library_name,
+        vul.cvss_score != null ? String(vul.cvss_score) : "",
+        (() => {
+          if (!vul.published_date) return "";
+          const d = new Date(vul.published_date);
+          return isNaN(d) ? "" : `${d.toLocaleDateString("en-GB").replace(/\//g, "-")} ${d.getFullYear()}`;
+        })(),
+      ].filter(Boolean).join(" ");
+
+      // ── Special: Wi-Fi / wifi ──
+      if (originalFilter.toLowerCase().replace(/-/g, "").includes("wifi")) {
+        return /\bwi.?fi\b/i.test(rawText) || normalize(rawText).includes("wifi");
+      }
+
+      // ── Special: CAN — strip ZDI-CAN-xxxxx entries so they don't false-match ──
+      if (originalFilter.trim().toUpperCase() === "CAN") {
+        return /\bCAN\b/.test(rawText.replace(/ZDI-CAN-\d+/gi, ""));
+      }
+
+      // ── Generic: word-boundary regex on normalized full text ──
+      return searchRegex.test(normalize(rawText));
+    });
   }
 
-
-  if (filter && filter !== "Others") {
-
-  data = data.filter(vul => {
-    const fields = [
-      vul.description || "",
-      vul.interface || "",
-      vul.title || "",
-      vul.ecu_name || ""
-    ];
-
-    // UNIVERSAL WIFI MATCHER — works for wifi, wi-fi, wi fi, WiFi, WI-FI...
-    if (originalFilter.toLowerCase().includes("wi")) {
-      return fields.some(text => {
-        const t = text.toLowerCase().replace(/-/g, "").replace(/\s+/g, "");
-        return t.includes("wifi");
-      });
-    }
-
-
-    // NORMAL logic for CAN, LIN, Ethernet, Bluetooth, etc.
-    const normalize = (str) =>
-    str.toLowerCase().replace(/[\s\-_]/g, "");
-
-  return fields.some(text =>
-    normalize(text).includes(normalize(filter))
-  );
-
-  })
-  
-  } else if (filter === "Others") {
-    const labels = ["CAN", "LIN", "Ethernet", "Wifi", "Bluetooth", "Telematics"];
-    data = data.filter(vul =>
-      !labels.some(label =>
-        (vul.description && vul.description.includes(label)) ||
-        (vul.interface && vul.interface.includes(label)) ||
-        (vul.title && vul.title.includes(label)) ||
-        (vul.ecu_name && vul.ecu_name.includes(label))
-      )
-    );
-  }
-
-  // Sort newest first
-  data.sort((a, b) =>
-    new Date(b.published_date || b.published || b.date || b.created_at || 0) -
-    new Date(a.published_date || a.published || a.date || a.created_at || 0)
-  );
+  // ── Sort: newest first (CVE year if present, else published_date)
+  data.sort((a, b) => {
+    const getTs = (vul) => {
+      if (vul.cve_id && /CVE-\d{4}-/i.test(vul.cve_id)) {
+        const m = vul.cve_id.match(/CVE-(\d{4})-/i);
+        if (m) return parseInt(m[1], 10) * 10000 +
+          (vul.published_date ? new Date(vul.published_date).getTime() / 1e10 : 0);
+      }
+      return vul.published_date ? new Date(vul.published_date).getTime() / 1e10 : 0;
+    };
+    return getTs(b) - getTs(a);
+  });
 
   vulnerabilitiesData = Array.isArray(data) ? data : [];
-  
-  if (filter) {
-      currentPage = 1;   // always start from page 1 for filtered results
+
+  if (normFilter) {
+    currentPage = 1;
   } else {
-      const savedPage = parseInt(sessionStorage.getItem('ledgerCurrentPage')) || 1;
-      currentPage = savedPage;
+    const savedPage = parseInt(sessionStorage.getItem("ledgerCurrentPage")) || 1;
+    currentPage = savedPage;
   }
 
   renderVulnerabilitiesPage(currentPage);
-
 }
+
 
 // -----------------------------
 // Setup Ledger Filters
 // -----------------------------
 /**
  * setupLedgerFilters(onFilterChange)
- * onFilterChange: function(filters) -> will be called when user performs:
- *   - search (click search button)           -> { search }
- *   - apply filters (Apply button)           -> { from, to, cveType }
- *   - reset filters inside sidebar           -> clears fields only (no fetch)
- *   - reset all (top reset button)           -> { resetAll: true }
- *
- * main.js should pass a function that performs the fetch using combined state.
+ * Always calls onFilterChange with the COMPLETE filter state:
+ *   { search, from, to, cveType, resetAll? }
+ * Never sends partial objects — eliminates stale-state bugs.
  */
 export function setupLedgerFilters(onFilterChange) {
-  const sidebar = document.getElementById("filter-sidebar");
-  const filterBtn = document.getElementById("filter-btn");
-  const closeBtn = document.getElementById("close-filter");
-  const applyBtn = document.getElementById("apply-filters-btn");
-  const resetFiltersBtn = document.getElementById("reset-filters-btn");
-  const resetAllBtn = document.getElementById("reset-all-btn");
-  const searchInput = document.getElementById("ledger-search");
-  const searchBtn = document.getElementById("ledger-search-btn");
+  const sidebar        = document.getElementById("filter-sidebar");
+  const filterBtn      = document.getElementById("filter-btn");
+  const closeBtn       = document.getElementById("close-filter");
+  const applyBtn       = document.getElementById("apply-filters-btn");
+  const resetFiltersBtn= document.getElementById("reset-filters-btn");
+  const resetAllBtn    = document.getElementById("reset-all-btn");
+  const searchInput    = document.getElementById("ledger-search");
+  const searchBtn      = document.getElementById("ledger-search-btn");
+  const fromInput      = document.getElementById("filter-from");
+  const toInput        = document.getElementById("filter-to");
+  const cveTypeSelect  = document.getElementById("filter-cve-type");
 
-  // ---- Create background overlay for dimming and outside-click ----
+  // ── Internal state (single source of truth inside this function) ──
+  let state = { search: "", from: "", to: "", cveType: "" };
+
+  const emit = () => {
+    if (typeof onFilterChange === "function") {
+      onFilterChange({ ...state });
+    }
+  };
+
+  // ── Overlay for sidebar backdrop ──
   let overlay = document.getElementById("filter-overlay");
   if (!overlay) {
     overlay = document.createElement("div");
@@ -277,85 +309,71 @@ export function setupLedgerFilters(onFilterChange) {
     document.body.appendChild(overlay);
   }
 
-  // ---- Helper functions for sidebar open/close ----
-  const openSidebar = () => {
-    sidebar?.classList.add("open");
-    overlay.classList.add("active");
-  };
+  const openSidebar  = () => { sidebar?.classList.add("open");    overlay.classList.add("active"); };
+  const closeSidebar = () => { sidebar?.classList.remove("open"); overlay.classList.remove("active"); };
 
-  const closeSidebar = () => {
-    sidebar?.classList.remove("open");
-    overlay.classList.remove("active");
-  };
-
-  // ---- Event Listeners ----
   filterBtn?.addEventListener("click", openSidebar);
-  closeBtn?.addEventListener("click", closeSidebar);
-  overlay?.addEventListener("click", closeSidebar); // click outside to close
+  closeBtn?.addEventListener("click",  closeSidebar);
+  overlay?.addEventListener("click",   closeSidebar);
 
-  // ---- Search button logic ----
-  searchBtn?.addEventListener("click", () => {
-    const query = searchInput?.value?.trim() ?? "";
-    if (typeof onFilterChange === "function") {
-      onFilterChange({ search: query });
-    }
+  // ── Live search: filter as user types (debounced 250ms) ──
+  let debounceTimer = null;
+  searchInput?.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      state.search = searchInput.value.trim();
+      emit();
+    }, 250);
   });
 
-  // ✅ Trigger search on Enter key
+  // ── Search button click ──
+  searchBtn?.addEventListener("click", () => {
+    clearTimeout(debounceTimer);
+    state.search = searchInput?.value?.trim() ?? "";
+    emit();
+  });
+
+  // ── Enter key in search box ──
   searchInput?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const query = searchInput?.value?.trim() ?? "";
-      if (typeof onFilterChange === "function") {
-        onFilterChange({ search: query });
-      }
+      clearTimeout(debounceTimer);
+      state.search = searchInput.value.trim();
+      emit();
     }
   });
 
-  // ---- Apply filters ----
+  // ── Apply sidebar filters (preserves current search) ──
   applyBtn?.addEventListener("click", () => {
-    const from = document.getElementById("filter-from")?.value ?? "";
-    const to = document.getElementById("filter-to")?.value ?? "";
-    const cveType = document.getElementById("filter-cve-type")?.value ?? "";
-
+    state.from    = fromInput?.value    ?? "";
+    state.to      = toInput?.value      ?? "";
+    state.cveType = cveTypeSelect?.value ?? "";
+    // state.search stays unchanged — keeps the text search active
     closeSidebar();
-
-    if (typeof onFilterChange === "function") {
-      onFilterChange({ from, to, cveType });
-    }
+    emit();
   });
 
-  // ---- Reset filters (inside sidebar only) ----
+  // ── Reset inside sidebar (clears date + cveType only, keeps search) ──
   resetFiltersBtn?.addEventListener("click", () => {
-    document.getElementById("filter-cve-type").value = "";
-    document.getElementById("filter-from").value = "";
-    document.getElementById("filter-to").value = "";
+    if (fromInput)     fromInput.value     = "";
+    if (toInput)       toInput.value       = "";
+    if (cveTypeSelect) cveTypeSelect.value = "";
+    state.from    = "";
+    state.to      = "";
+    state.cveType = "";
+    emit();
   });
 
-  // ---- Reset All (top-right) ----
+  // ── Reset ALL (clears everything) ──
   resetAllBtn?.addEventListener("click", () => {
-    // Clear sidebar inputs
-    if (document.getElementById("filter-cve-type"))
-      document.getElementById("filter-cve-type").value = "";
-    if (document.getElementById("filter-from"))
-      document.getElementById("filter-from").value = "";
-    if (document.getElementById("filter-to"))
-      document.getElementById("filter-to").value = "";
-
-    // Clear search boxes
-    if (searchInput) searchInput.value = "";
-    const navSearchInput = document.getElementById("search-input");
-    if (navSearchInput) navSearchInput.value = "";
-
-    // Notify main.js to reload all data
+    if (fromInput)     fromInput.value     = "";
+    if (toInput)       toInput.value       = "";
+    if (cveTypeSelect) cveTypeSelect.value = "";
+    if (searchInput)   searchInput.value   = "";
+    state = { search: "", from: "", to: "", cveType: "" };
     if (typeof onFilterChange === "function") {
-      onFilterChange({
-        resetAll: true,
-        search: "",
-        from: "",
-        to: "",
-        cveType: "",
-      });
+      onFilterChange({ ...state, resetAll: true });
     }
   });
 }
+

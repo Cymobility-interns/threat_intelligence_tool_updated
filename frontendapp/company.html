@@ -1,56 +1,55 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Companies</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-        <link rel="stylesheet" href="assets/css/company.css">
-        
-        <style>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Companies</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/company.css">
+
+    <style>
         #navbar {
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1020;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1020;
         }
-        </style>
-        
-    </head>
+    </style>
 
-    <body>
-        <div id="navbar"></div>
-        <!-- <h2 id="company-header">Select Your Company Type</h2> -->
-         <div class="d-flex align-items-center justify-content-center position-relative w-100 px-3"
-            style="margin-top: -12px;"
-         >
-            <!-- Back Button -->
-            <button 
-                class="btn btn-outline-light rounded-circle position-absolute start-0 d-flex align-items-center justify-content-center"
-                style="width: 40px; height: 40px; border: 2px solid #55dddd; margin-left:16px; hover { background-color: #55dddd; }"
-                onclick="window.location.href='dashboard.html'"
-            >
-                <i class="bi bi-arrow-left" style="font-size: 1.4rem; font-weight: bold;"></i>
-            </button>
+</head>
 
-            <!-- Title -->
-            <h2 id="company-header" class="text-center mb-0"><b>Select Your Company Type</b></h2>
+<body>
+    <div id="navbar"></div>
+    <!-- <h2 id="company-header">Select Your Company Type</h2> -->
+    <div class="d-flex align-items-center justify-content-center position-relative w-100 px-3"
+        style="margin-top: -12px;">
+        <!-- Back Button -->
+        <button
+            class="btn btn-outline-light rounded-circle position-absolute start-0 d-flex align-items-center justify-content-center"
+            style="width: 40px; height: 40px; border: 2px solid #55dddd; margin-left:16px; hover { background-color: #55dddd; }"
+            onclick="window.location.href='dashboard.html'">
+            <i class="bi bi-arrow-left" style="font-size: 1.4rem; font-weight: bold;"></i>
+        </button>
+
+        <!-- Title -->
+        <h2 id="company-header" class="text-center mb-0"><b>Select Your Company Type</b></h2>
+    </div>
+
+    <div class="company-options">
+        <div class="company-option" onclick="window.location.href='brand.html'">
+            <img src="assets/images/Automotive car.jpg" alt="OEM">
+            <p>OEM</p>
         </div>
-
-        <div class="company-options">
-            <div class="company-option" onclick="window.location.href='brand.html'">
-                <img src="assets/images/Automotive car.jpg" alt="OEM">
-                <p>OEM</p>
-            </div>
-            <div class="company-option" onclick="window.location.href='tier1.html'">
-                <img src="assets/images/ecu.png" alt="Tier 1 Supplier">
-                <p>Tier 1 Supplier</p>
-            </div>
+        <div class="company-option" onclick="window.location.href='tier1.html'">
+            <img src="assets/images/ecu.png" alt="Tier 1 Supplier">
+            <p>Tier 1 Supplier</p>
         </div>
-        
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- <script>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script>
             fetch("components/navbar.html")
         .then(res => res.text())
         .then(data => {
@@ -58,12 +57,12 @@
         });
         </script> -->
 
-        <!-- load navbar helper script normally (must be available before calling initNavbar) -->
-        <script src="components/navbar.js"></script>
-        <script type="module" src="assets/js/protected.js"></script>
+    <!-- load navbar helper script normally (must be available before calling initNavbar) -->
+    <script src="components/navbar.js"></script>
+    <script type="module" src="assets/js/protected.js"></script>
 
-        <script>
-            fetch("components/navbar.html", { cache: 'no-store' })
+    <script>
+        fetch("components/navbar.html", { cache: 'no-store' })
             .then(res => res.ok ? res.text() : Promise.reject(res.status))
             .then(html => {
                 document.getElementById("navbar").innerHTML = html;
@@ -72,7 +71,8 @@
                 else console.warn('initNavbar not found — ensure components/navbar.js is loaded.');
             })
             .catch(err => console.error('Failed to load navbar:', err));
-        </script>
+    </script>
 
-    </body>
-    </html>
+</body>
+
+</html>

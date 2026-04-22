@@ -1,12 +1,10 @@
-
-// const API_BASE = "http://192.168.0.21:8000";
-// =======
-export const API_BASE = "http://127.0.0.1:8000";
+// Dynamically match API_BASE to the frontend hostname to keep session cookies working
+export const API_BASE = `http://${window.location.hostname || "127.0.0.1"}:8000`;
 
 /**
  * Fetch vulnerabilities with optional filters.
  * Accepts: { from, to, search, cveType }
- * Sends cveType as `cve_type` query param (backend-friendly).
+ * Sends cveType as 'cve_type' query param (backend-friendly).
  */
 export async function fetchVulnerabilities({ from, to, search, cveType } = {}) {
 
