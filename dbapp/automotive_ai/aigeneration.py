@@ -75,19 +75,47 @@ Numbered Input Descriptions:
 Output JSON Array:
 [
   {{
-    "company": "", "title": "", "attack_path": "", "interface": "",
-    "tools_used": "", "types_of_attack": "", "level_of_attack": "",
-    "damage_scenario": "", "cia": "", "impact": "", "feasibility": "",
-    "countermeasures": "", "model_name": "", "model_year": "",
-    "ecu_name": "", "library_name": ""
+    "cve_id":"",
+    "source": "",
+    "company": "", 
+    "title": "", 
+    "attack_path": "", 
+    "interface": "",
+    "tools_used": "", 
+    "types_of_attack": "", 
+    "level_of_attack": "",
+    "damage_scenario": "", 
+    "cia": "", 
+    "impact": "", 
+    "feasibility": "",
+    "countermeasures": "", 
+    "model_name": "", 
+    "model_year": "",
+    "ecu_name": "", 
+    "library_name": ""
   }}
 ]
 """
 
 EXPECTED_FIELDS = [
-    "company", "title", "attack_path", "interface", "tools_used", "types_of_attack",
-    "level_of_attack", "damage_scenario", "cia", "impact", "feasibility",
-    "countermeasures", "model_name", "model_year", "ecu_name", "library_name"
+    "cve_id",
+    "source", 
+    "company", 
+    "title", 
+    "attack_path", 
+    "interface", 
+    "tools_used", 
+    "types_of_attack",
+    "level_of_attack", 
+    "damage_scenario", 
+    "cia", 
+    "impact", 
+    "feasibility",
+    "countermeasures", 
+    "model_name", 
+    "model_year", 
+    "ecu_name", 
+    "library_name"
 ]
 
 # Runtime configs (CLI can override batch size and dry-run)
