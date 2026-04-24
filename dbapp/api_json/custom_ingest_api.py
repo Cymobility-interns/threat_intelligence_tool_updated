@@ -162,4 +162,4 @@ def fetch_cves_custom(start_date: str, end_date: str):
 
 if __name__ == "__main__":
     # Example usage → change dates as needed
-    fetch_cves_custom("2024-05-01", "2024-05-05")
+    fetch_cves_custom("2020-07-19", "2026-05-14")

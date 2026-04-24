@@ -27,7 +27,7 @@ import traceback
 load_dotenv()
 
 # ---------------- CONFIG ----------------
-DB_NAME = os.getenv("PG_DB", "vuldb")
+DB_NAME = os.getenv("PG_DB", "vuldbtest")
 DB_USER = os.getenv("PG_USER", "postgres")
 DB_PASS = os.getenv("PG_PASS", "123456")
 DB_HOST = os.getenv("PG_HOST", "localhost")

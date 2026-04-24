@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ---------------- DB CONFIG ----------------
-DB_NAME = os.getenv("PG_DB", "vuldb")
+DB_NAME = os.getenv("PG_DB", "vuldbtest")
 DB_USER = os.getenv("PG_USER", "postgres")
 DB_PASS = os.getenv("PG_PASS", "123456")
 DB_HOST = os.getenv("PG_HOST", "localhost")
@@ -37,7 +37,14 @@ LABELS = [
     "Embedded Systems Vulnerability"
 ]
 
-SCHEMA_FIELDS = ["id", "cve_id", "source", "published_date", "description", "cvss_score"]
+SCHEMA_FIELDS = [
+    "id", 
+    "cve_id",
+    "source", 
+    "published_date",
+    "description", 
+    "cvss_score"
+    ]
 
 # ---------------- DATABASE FUNCTIONS ----------------
 def connect_db():
@@ -87,10 +94,10 @@ def mark_processed(ids):
 # ---------------- TEXT PREPROCESSING ----------------
 def preprocess_description(text: str) -> str:
     """
-    Cleans CVE descriptions before classification to avoid misleading tokens.
-    - Removes internal tracking IDs like (ZDI-CAN-12345)
-    - Normalizes whitespace
-    - Strips leading/trailing junk
+      Cleans CVE descriptions before classification to avoid misleading tokens.
+      Removes internal tracking IDs like (ZDI-CAN-12345)
+      Normalizes whitespace
+      Strips leading/trailing junk
     """
     if not text:
         return ""

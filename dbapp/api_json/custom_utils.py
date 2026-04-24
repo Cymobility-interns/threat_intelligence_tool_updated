@@ -38,7 +38,6 @@ def parse_cve_item(item):
             metric = metrics["cvssMetricV2"][0]["cvssData"]
         else:
             metric = None
-
         if metric:
             severity = metric.get("baseSeverity")
             cvss_score = metric.get("baseScore")
