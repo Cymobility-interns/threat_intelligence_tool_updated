@@ -1,3 +1,11 @@
+import sys
+import os
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.append(str(BASE_DIR))
+sys.stdout.reconfigure(encoding='utf-8')
+
 import requests
 import time
 from datetime import datetime, timezone, timedelta, date

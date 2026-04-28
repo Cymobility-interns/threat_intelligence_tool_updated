@@ -27,7 +27,8 @@ h3 {
   border-collapse: collapse !important;
   width: 100%;
   border: 2px solid #AAEEEE !important;
-  background-color: transparent !important; /* make entire table transparent */
+  background-color: transparent !important;
+  /* make entire table transparent */
 }
 
 /* Table header */
@@ -40,11 +41,13 @@ h3 {
 /* Table cells */
 .table td,
 .table th {
-  background-color: transparent !important; /* transparent rows */
+  background-color: transparent !important;
+  /* transparent rows */
   color: #ffffff !important;
   text-align: left;
   vertical-align: middle;
-  border-bottom: 1px solid rgba(170, 238, 238, 0.4) !important; /* subtle horizontal line */
+  border-bottom: 1px solid rgba(170, 238, 238, 0.4) !important;
+  /* subtle horizontal line */
 }
 
 /* Fixed table layout to prevent column jumping */
@@ -63,17 +66,20 @@ h3 {
 /* Specific column widths */
 .table-fixed th:nth-child(1),
 .table-fixed td:nth-child(1) {
-  width: 150px; /* Identifier */
+  width: 150px;
+  /* Identifier */
 }
 
 .table-fixed th:nth-child(2),
 .table-fixed td:nth-child(2) {
-  width: 400px; /* Attack Title */
+  width: 400px;
+  /* Attack Title */
 }
 
 .table-fixed th:nth-child(3),
 .table-fixed td:nth-child(3) {
-  width: 100px; /* Published Date */
+  width: 100px;
+  /* Published Date */
 }
 
 .table tr:hover {
@@ -93,10 +99,10 @@ a.cve-link:hover {
 }
 
 /* Entries WITHOUT a CVE ID — classified by published date only */
-.no-cve-id {
-  color: #FFB347 !important; /* warm amber */
+/* .no-cve-id {
+  color: #FFB347 !important; warm amber
   font-style: italic;
-}
+} */
 
 /* Small badge shown next to the display value */
 .date-only-badge {
@@ -160,6 +166,7 @@ a.cve-link:hover {
   z-index: 1050;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.6);
 }
+
 .filter-sidebar.open {
   left: 0;
 }
@@ -192,4 +199,3 @@ button.btn.rounded-circle:hover {
   opacity: 1;
   pointer-events: all;
 }
-

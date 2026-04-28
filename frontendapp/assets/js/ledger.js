@@ -37,7 +37,7 @@ function renderVulnerabilitiesPage(page) {
     emptyState.style.display = "none";
   }
 
-    //Remember current page for back navigation
+  //Remember current page for back navigation
   sessionStorage.setItem('lastSource', 'ledger');
   sessionStorage.setItem('ledgerCurrentPage', currentPage);
 
@@ -59,7 +59,7 @@ function renderVulnerabilitiesPage(page) {
       return `internal-${crypto.randomUUID()}`;
     }
     // fallback if crypto.randomUUID not available
-    return `internal-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
+    return `internal-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
   }
 
   const start = (page - 1) * entriesPerPage;
@@ -87,7 +87,7 @@ function renderVulnerabilitiesPage(page) {
     // - WITHOUT cve_id → amber + "Date Only" badge (classified purely by published date)
     const identifierCell = hasCveId
       ? `<td>${escapeHtml(displayId)}</td>`
-      : `<td class="no-cve-id">${escapeHtml(displayId)}<span class="date-only-badge">Date Only</span></td>`;
+      : `<td class="no-cve-id">${escapeHtml(displayId)}</td>`;
 
     const row = document.createElement("tr");
     row.classList.add("ledger-row");
@@ -280,17 +280,17 @@ export function renderVulnerabilities(data, searchTerm) {
  * Never sends partial objects — eliminates stale-state bugs.
  */
 export function setupLedgerFilters(onFilterChange) {
-  const sidebar        = document.getElementById("filter-sidebar");
-  const filterBtn      = document.getElementById("filter-btn");
-  const closeBtn       = document.getElementById("close-filter");
-  const applyBtn       = document.getElementById("apply-filters-btn");
-  const resetFiltersBtn= document.getElementById("reset-filters-btn");
-  const resetAllBtn    = document.getElementById("reset-all-btn");
-  const searchInput    = document.getElementById("ledger-search");
-  const searchBtn      = document.getElementById("ledger-search-btn");
-  const fromInput      = document.getElementById("filter-from");
-  const toInput        = document.getElementById("filter-to");
-  const cveTypeSelect  = document.getElementById("filter-cve-type");
+  const sidebar = document.getElementById("filter-sidebar");
+  const filterBtn = document.getElementById("filter-btn");
+  const closeBtn = document.getElementById("close-filter");
+  const applyBtn = document.getElementById("apply-filters-btn");
+  const resetFiltersBtn = document.getElementById("reset-filters-btn");
+  const resetAllBtn = document.getElementById("reset-all-btn");
+  const searchInput = document.getElementById("ledger-search");
+  const searchBtn = document.getElementById("ledger-search-btn");
+  const fromInput = document.getElementById("filter-from");
+  const toInput = document.getElementById("filter-to");
+  const cveTypeSelect = document.getElementById("filter-cve-type");
 
   // ── Internal state (single source of truth inside this function) ──
   let state = { search: "", from: "", to: "", cveType: "" };
@@ -309,12 +309,12 @@ export function setupLedgerFilters(onFilterChange) {
     document.body.appendChild(overlay);
   }
 
-  const openSidebar  = () => { sidebar?.classList.add("open");    overlay.classList.add("active"); };
+  const openSidebar = () => { sidebar?.classList.add("open"); overlay.classList.add("active"); };
   const closeSidebar = () => { sidebar?.classList.remove("open"); overlay.classList.remove("active"); };
 
   filterBtn?.addEventListener("click", openSidebar);
-  closeBtn?.addEventListener("click",  closeSidebar);
-  overlay?.addEventListener("click",   closeSidebar);
+  closeBtn?.addEventListener("click", closeSidebar);
+  overlay?.addEventListener("click", closeSidebar);
 
   // ── Live search: filter as user types (debounced 250ms) ──
   let debounceTimer = null;
@@ -345,8 +345,8 @@ export function setupLedgerFilters(onFilterChange) {
 
   // ── Apply sidebar filters (preserves current search) ──
   applyBtn?.addEventListener("click", () => {
-    state.from    = fromInput?.value    ?? "";
-    state.to      = toInput?.value      ?? "";
+    state.from = fromInput?.value ?? "";
+    state.to = toInput?.value ?? "";
     state.cveType = cveTypeSelect?.value ?? "";
     // state.search stays unchanged — keeps the text search active
     closeSidebar();
@@ -355,21 +355,21 @@ export function setupLedgerFilters(onFilterChange) {
 
   // ── Reset inside sidebar (clears date + cveType only, keeps search) ──
   resetFiltersBtn?.addEventListener("click", () => {
-    if (fromInput)     fromInput.value     = "";
-    if (toInput)       toInput.value       = "";
+    if (fromInput) fromInput.value = "";
+    if (toInput) toInput.value = "";
     if (cveTypeSelect) cveTypeSelect.value = "";
-    state.from    = "";
-    state.to      = "";
+    state.from = "";
+    state.to = "";
     state.cveType = "";
     emit();
   });
 
   // ── Reset ALL (clears everything) ──
   resetAllBtn?.addEventListener("click", () => {
-    if (fromInput)     fromInput.value     = "";
-    if (toInput)       toInput.value       = "";
+    if (fromInput) fromInput.value = "";
+    if (toInput) toInput.value = "";
     if (cveTypeSelect) cveTypeSelect.value = "";
-    if (searchInput)   searchInput.value   = "";
+    if (searchInput) searchInput.value = "";
     state = { search: "", from: "", to: "", cveType: "" };
     if (typeof onFilterChange === "function") {
       onFilterChange({ ...state, resetAll: true });

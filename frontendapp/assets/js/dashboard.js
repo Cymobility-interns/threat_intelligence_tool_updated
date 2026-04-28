@@ -240,25 +240,25 @@ function generateCustomLegend(chart, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = '';
-  
+
   const labels = chart.data.labels;
   const colors = chart.data.datasets[0].backgroundColor;
-  
+
   labels.forEach((label, index) => {
     const item = document.createElement('div');
     item.className = 'legend-item';
     item.onclick = () => {
       window.location.href = `ledger.html?filter=${encodeURIComponent(label)}`;
     };
-    
+
     const colorBox = document.createElement('div');
     colorBox.className = 'legend-color';
     colorBox.style.backgroundColor = colors[index];
-    
+
     const text = document.createElement('div');
     text.className = 'legend-label';
     text.innerText = label;
-    
+
     item.appendChild(colorBox);
     item.appendChild(text);
     container.appendChild(item);
@@ -431,7 +431,7 @@ async function renderRecentAttacks() {
     const hasCveId = !!attack.cve_id;
     const identifierCell = hasCveId
       ? `<td><a href="details.html?cve=${encodeURIComponent(urlParam)}" class="cve-link">${cveId}</a></td>`
-      : `<td class="no-cve-id"><a href="details.html?cve=${encodeURIComponent(urlParam)}" style="color:inherit;text-decoration:none;">N/A</a><span class="date-only-badge">Date Only</span></td>`;
+      : `<td class="no-cve-id"><a href="details.html?cve=${encodeURIComponent(urlParam)}" style="color:inherit;text-decoration:none;">N/A</a></td>`;
 
     row.innerHTML = `
       ${identifierCell}

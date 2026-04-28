@@ -196,6 +196,8 @@ class SafeScraper:
             response = self.scraper.get(url, timeout=15)
             response.raise_for_status()
             print(f"[OK] Fetched: {url}")
+            print(f"[DEBUG] Response Type: {type(response)}")
+            print(f"[DEBUG] Response Attributes: {dir(response)}")
             return response.text
         except Exception as e:
             print(f"[ERROR] Fetching {url}: {e}")
@@ -480,4 +482,3 @@ if __name__ == "__main__":
         print(f"\n[FINISHED] Processed {len(results)} new sites for {table_name}.")
         if results:
             save_to_postgres(results, table_name)
-

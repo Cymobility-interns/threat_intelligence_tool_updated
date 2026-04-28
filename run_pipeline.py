@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -19,7 +20,10 @@ SCRIPTS = [
 
 def run_script(script_path):
     print(f"\n==== [{datetime.now()}] Running {script_path.name} ====")
-    result = subprocess.run([sys.executable, str(script_path)])
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(BASE_DIR)
+    env["PYTHONIOENCODING"] = "utf-8"
+    result = subprocess.run([sys.executable, str(script_path)], env=env)
     if result.returncode != 0:
         print(f"{script_path.name} failed with exit code {result.returncode}")
         return False

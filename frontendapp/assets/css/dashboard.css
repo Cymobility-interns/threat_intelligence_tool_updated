@@ -235,12 +235,12 @@ body {
 }
 
 /* Entries WITHOUT a CVE ID — classified by published date only */
-.no-cve-id {
+/* .no-cve-id {
   color: #FFB347 !important;
-  /* warm amber */
+  warm amber
   font-style: italic;
   font-weight: bold;
-}
+} */
 
 /* Small badge next to Non-CVE display value */
 .date-only-badge {
