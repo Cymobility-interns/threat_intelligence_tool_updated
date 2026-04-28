@@ -120,42 +120,38 @@ def classify_batch(records, sub_batch_size=10):
 
         # Build Grok classification prompt
         prompt = f"""
-You are a strict vulnerability classifier.
-Classify each CVE description into one of these labels:
-{', '.join(LABELS)}
+            You are a strict vulnerability classifier.
+            Classify each CVE description into one of these labels:
+            {', '.join(LABELS)}
 
-Classification rules (semantic, not keyword-based):
+            Classification rules (semantic, not keyword-based):
 
-1. "Automotive Vulnerability" if the vulnerability affects components, 
-   protocols, or hardware used in vehicles. 
-   CRITICAL: Any mention of automotive protocols—CAN bus, CAN driver, 
-   Controller Area Network, LIN, FlexRay, BroadR-Reach, SOME/IP, 
-   DoIP, UDS, OBD-II, or IVI/Infotainment—MUST be classified 
-   as "Automotive Vulnerability" (even if it occurs in the Linux kernel).
+            1. "Automotive Vulnerability": Use this label aggressively. If the vulnerability affects components, protocols, software, or hardware used in vehicles, it MUST be classified as "Automotive Vulnerability". 
+            CRITICAL: Any mention of the following MUST be classified as "Automotive Vulnerability":
+            - Vehicles: car, vehicle, truck, fleet, motorcycle, autonomous driving, ADAS, EV charging, V2X, connected vehicle.
+            - Protocols: CAN bus, CAN driver, Controller Area Network, LIN, FlexRay, BroadR-Reach, SOME/IP, DoIP, UDS, OBD-II.
+            - Systems: IVI, Infotainment, head unit, telematics, Android Auto, Apple CarPlay, Automotive Grade Linux (AGL), QNX.
+            - Operating Systems: ANY Android or Linux-based vulnerabilities that are contextualized within or affect the automotive industry, vehicle displays, or infotainment screens.
+            When in doubt, bias heavily toward "Automotive Vulnerability". It is acceptable to misclassify a general IT vulnerability as Automotive if it has potential automotive implications. Do not leave any automotive vulnerability behind!
 
-2. "IoT Vulnerability" if it affects consumer or commercial smart devices
-   (cameras, smart meters, connected sensors, etc.) that are NOT automotive.
+            2. "IoT Vulnerability": Use this for consumer or commercial smart devices (cameras, smart meters, connected sensors, gateways, wearables, etc.) that are connected to the internet, cloud, or external networks, but are NOT automotive.
 
-3. "IT Vulnerability" for general software (OS, browsers, web apps, databases) 
-   unless they meet Rule #1.
+            3. "Embedded Systems Vulnerability": Use this for standalone embedded devices that are NOT primarily internet-connected and NOT industrial control systems (e.g., firmware-based controllers inside appliances, offline medical devices, or microcontroller-based products that operate independently).
 
-4. If the description contains "REJECTED", "RESERVED", or "DUPLICATE",
-   classify it as "IT Vulnerability".
+            4. "Operational Technology (OT) Vulnerability": Use this ONLY for embedded devices that are part of industrial control, automation, or critical infrastructure systems, such as PLCs, SCADA components, industrial controllers, factory automation equipment, or process plants.
 
-5. Favor "Automotive Vulnerability" for any hardware/protocol context 
-   traditionally associated with vehicle networks. Default to "IT Vulnerability" 
-   only if there is zero automotive or embedded context.
+            5. "IT Vulnerability": Use this for standard enterprise software, web applications, and general IT infrastructure that does not fit the above categories. 
+            CRITICAL: If the description contains "REJECTED", "RESERVED", or "DUPLICATE", classify it strictly as "IT Vulnerability".
 
-Return only JSON in this format:
-[
-  {{ "cve_id": "CVE-XXXX-YYYY", "label": "..." }},
-  {{ "cve_id": "CVE-XXXX-ZZZZ", "label": "..." }}
-]
+            Return only JSON in this format:
+            [
+                {{ "cve_id": "CVE-XXXX-YYYY", "label": "..." }},
+                {{ "cve_id": "CVE-XXXX-ZZZZ", "label": "..." }}
+            ]
 
-Descriptions:
-{batch_text}
-"""
-
+            Descriptions:
+            {batch_text}
+            """
         try:
             response = client.chat.completions.create(
                 model="grok-3-mini",
