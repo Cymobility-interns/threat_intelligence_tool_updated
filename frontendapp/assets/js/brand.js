@@ -8,23 +8,33 @@ import { API_BASE } from "./api.js";
 // }
 // document.addEventListener("DOMContentLoaded", protectPage);
  
- const orbit = document.getElementById('brand-orbit');
+    const orbit = document.getElementById('brand-orbit');
     const logos = document.querySelectorAll('.brand-logo');
     const carouselContainer = document.getElementById('carousel-container');
     const totalLogos = logos.length;
-    const radius = 280;
     let isHighlightingActive = true;
 
     // Position logos around the circle
-    logos.forEach((logo, index) => {
-      const angle = (360 / totalLogos) * index;
-      const radian = (angle * Math.PI) / 180;
-      const x = radius * Math.cos(radian);
-      const y = radius * Math.sin(radian);
-      
-      logo.style.left = `calc(50% + ${x}px - 40px)`;
-      logo.style.top = `calc(50% + ${y}px - 40px)`;
-    });
+    function positionLogos() {
+      const containerWidth = carouselContainer.offsetWidth;
+      const radius = containerWidth * 0.4; // 40% of container width
+
+      logos.forEach((logo, index) => {
+        const angle = (360 / totalLogos) * index;
+        const radian = (angle * Math.PI) / 180;
+        const x = radius * Math.cos(radian);
+        const y = radius * Math.sin(radian);
+        
+        logo.style.left = `calc(50% + ${x}px - ${logo.offsetWidth / 2}px)`;
+        logo.style.top = `calc(50% + ${y}px - ${logo.offsetHeight / 2}px)`;
+      });
+    }
+
+    // Initial position
+    positionLogos();
+
+    // Re-position on resize
+    window.addEventListener('resize', positionLogos);
 
     // Highlight the logo at the bottom center (only when not paused)
     function highlightCenterLogo() {

@@ -207,10 +207,10 @@ export function renderVulnerabilities(data, searchTerm) {
     // Escape any regex special characters in user input
     const escaped = normFilter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-    // \b before the term = must start at a word boundary.
-    // "hero" → matches "hero", "heroic", "hero motocorp"
-    //        → does NOT match "Cherokee" (c before h, no boundary)
-    const searchRegex = new RegExp(`\\b${escaped}`, "i");
+    // \b around the term = must match a full word.
+    // "hero" → matches "hero", "hero motocorp"
+    //        → does NOT match "heroic"
+    const searchRegex = new RegExp(`\\b${escaped}\\b`, "i");
 
     data = data.filter(vul => {
       // ── Full raw text (for special-case handlers that need original casing) ──
@@ -291,9 +291,14 @@ export function setupLedgerFilters(onFilterChange) {
   const fromInput = document.getElementById("filter-from");
   const toInput = document.getElementById("filter-to");
   const cveTypeSelect = document.getElementById("filter-cve-type");
+  const cvssSelect = document.getElementById("filter-cvss");
+  const interfaceSelect = document.getElementById("filter-interface");
+  const levelSelect = document.getElementById("filter-level");
+  const companyInput = document.getElementById("filter-company");
+  const countermeasuresSelect = document.getElementById("filter-countermeasures");
 
   // ── Internal state (single source of truth inside this function) ──
-  let state = { search: "", from: "", to: "", cveType: "" };
+  let state = { search: "", from: "", to: "", cveType: "", cvss: "", interface: "", level: "", company: "", countermeasures: "" };
 
   const emit = () => {
     if (typeof onFilterChange === "function") {
@@ -348,19 +353,35 @@ export function setupLedgerFilters(onFilterChange) {
     state.from = fromInput?.value ?? "";
     state.to = toInput?.value ?? "";
     state.cveType = cveTypeSelect?.value ?? "";
+    state.cvss = cvssSelect?.value ?? "";
+    state.interface = interfaceSelect?.value ?? "";
+    state.level = levelSelect?.value ?? "";
+    state.company = companyInput?.value ?? "";
+    state.countermeasures = countermeasuresSelect?.value ?? "";
     // state.search stays unchanged — keeps the text search active
     closeSidebar();
     emit();
   });
 
-  // ── Reset inside sidebar (clears date + cveType only, keeps search) ──
+  // ── Reset inside sidebar (clears everything except search) ──
   resetFiltersBtn?.addEventListener("click", () => {
     if (fromInput) fromInput.value = "";
     if (toInput) toInput.value = "";
     if (cveTypeSelect) cveTypeSelect.value = "";
+    if (cvssSelect) cvssSelect.value = "";
+    if (interfaceSelect) interfaceSelect.value = "";
+    if (levelSelect) levelSelect.value = "";
+    if (companyInput) companyInput.value = "";
+    if (countermeasuresSelect) countermeasuresSelect.value = "";
+    
     state.from = "";
     state.to = "";
     state.cveType = "";
+    state.cvss = "";
+    state.interface = "";
+    state.level = "";
+    state.company = "";
+    state.countermeasures = "";
     emit();
   });
 
@@ -369,8 +390,14 @@ export function setupLedgerFilters(onFilterChange) {
     if (fromInput) fromInput.value = "";
     if (toInput) toInput.value = "";
     if (cveTypeSelect) cveTypeSelect.value = "";
+    if (cvssSelect) cvssSelect.value = "";
+    if (interfaceSelect) interfaceSelect.value = "";
+    if (levelSelect) levelSelect.value = "";
+    if (companyInput) companyInput.value = "";
+    if (countermeasuresSelect) countermeasuresSelect.value = "";
     if (searchInput) searchInput.value = "";
-    state = { search: "", from: "", to: "", cveType: "" };
+    
+    state = { search: "", from: "", to: "", cveType: "", cvss: "", interface: "", level: "", company: "", countermeasures: "" };
     if (typeof onFilterChange === "function") {
       onFilterChange({ ...state, resetAll: true });
     }

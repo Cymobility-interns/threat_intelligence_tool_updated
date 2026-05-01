@@ -28,19 +28,21 @@ def parse_cve_item(item):
     metrics = cve.get("metrics", {})
     severity, cvss_score = None, None
     try:
+        metric_obj = None
         if "cvssMetricV40" in metrics:
-            metric = metrics["cvssMetricV40"][0]["cvssData"]
+            metric_obj = metrics["cvssMetricV40"][0]
         elif "cvssMetricV31" in metrics:
-            metric = metrics["cvssMetricV31"][0]["cvssData"]
+            metric_obj = metrics["cvssMetricV31"][0]
         elif "cvssMetricV30" in metrics:
-            metric = metrics["cvssMetricV30"][0]["cvssData"]
+            metric_obj = metrics["cvssMetricV30"][0]
         elif "cvssMetricV2" in metrics:
-            metric = metrics["cvssMetricV2"][0]["cvssData"]
-        else:
-            metric = None
-        if metric:
-            severity = metric.get("baseSeverity")
-            cvss_score = metric.get("baseScore")
+            metric_obj = metrics["cvssMetricV2"][0]
+            
+        if metric_obj:
+            metric_data = metric_obj.get("cvssData", {})
+            cvss_score = metric_data.get("baseScore")
+            # In V3/V4, baseSeverity is inside cvssData. In V2, it's outside.
+            severity = metric_data.get("baseSeverity") or metric_obj.get("baseSeverity")
     except Exception:
         pass
 

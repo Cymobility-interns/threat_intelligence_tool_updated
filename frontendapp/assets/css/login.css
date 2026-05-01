@@ -41,17 +41,25 @@ body {
 
 .login-container {
   background: rgba(0, 0, 59, 0.7);
-  padding: 80px;                  
-  /* border-radius: 12px; */
+  padding: 40px;                  
   max-width: 500px;               
-  min-height: 400px;              
+  width: 90%;
   margin: 50px auto;
   text-align: center;
 }
 
+@media (max-width: 576px) {
+  .login-container {
+    padding: 30px 20px;
+    margin: 20px auto;
+  }
+}
+
 
 .logo {
-  width: 400px;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
   margin-bottom: 20px;
   margin-top: 20px;
 }

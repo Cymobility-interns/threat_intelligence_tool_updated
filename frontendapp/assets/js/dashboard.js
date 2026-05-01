@@ -9,25 +9,18 @@ async function getInterfaceCounts() {
   const counts = { CAN: 0, LIN: 0, Ethernet: 0, "Wi-Fi": 0, Bluetooth: 0 };
 
   vulnerabilities.forEach(vul => {
-
-    const fields = [
-      vul.description || "",
-      vul.interface || "",
-      vul.title || "",
-      vul.ecu_name || ""
-    ];
+    const allText = Object.values(vul)
+      .filter(val => typeof val === 'string')
+      .join(' ');
+    const allTextLower = allText.toLowerCase();
 
     labels.forEach(label => {
-
       // ---------------------------------------
-      // WIFI logic (already working)
+      // WIFI logic
       // ---------------------------------------
       if (label === "Wi-Fi") {
-        const match = fields.some(text => {
-          const normalized = text.toLowerCase().replace(/-/g, "");
-          return normalized.includes("wifi");
-        });
-        if (match) counts["Wi-Fi"]++;
+        const normalized = allTextLower.replace(/-/g, "");
+        if (normalized.includes("wifi")) counts["Wi-Fi"]++;
         return;
       }
 
@@ -35,33 +28,25 @@ async function getInterfaceCounts() {
       // CAN PROTOCOL MATCH (Option D + ZDI Fix)
       // ---------------------------------------
       if (label === "CAN") {
-        const match = fields.some(text => {
-          const hasZDI = /ZDI-CAN-\d+/i.test(text);
-
-          // Remove ZDI-CAN-xxxx part from the text
-          const cleaned = text.replace(/ZDI-CAN-\d+/gi, "");
-
-          // Check if cleaned text still contains real CAN reference
-          const hasRealCAN = cleaned.includes("CAN");
-
-          // If real CAN exists → count
-          if (hasRealCAN) return true;
-
-          // If only ZDI-CAN remains → do not count
-          return false;
-        });
-
-        if (match) counts.CAN++;
+        const cleaned = allText.replace(/ZDI-CAN-\d+/gi, "");
+        if (cleaned.includes("CAN")) counts.CAN++;
         return;
       }
 
+      // ---------------------------------------
+      // LIN MATCH
+      // ---------------------------------------
+      if (label === "LIN") {
+        if (/\blin\b/i.test(allText)) counts.LIN++;
+        return;
+      }
 
       // ---------------------------------------
-      // DEFAULT logic for other protocols (LIN, Ethernet, Bluetooth)
-      // CASE-SENSITIVE contains()
+      // DEFAULT logic for other protocols (Ethernet, Bluetooth)
       // ---------------------------------------
-      const match = fields.some(text => text.includes(label));
-      if (match) counts[label]++;
+      if (allTextLower.includes(label.toLowerCase())) {
+        counts[label]++;
+      }
     });
   });
 
@@ -77,15 +62,16 @@ async function getECUCounts() {
   const counts = { Infotainment: 0, ADAS: 0, Telematics: 0, "Body Control Unit": 0 };
 
   vulnerabilities.forEach(vul => {
+    const allTextLower = Object.values(vul)
+      .filter(val => typeof val === 'string')
+      .join(' ')
+      .toLowerCase();
+
     labels.forEach(label => {
       const searchText = label.toLowerCase();
-      if (
-        (vul.description && vul.description.toLowerCase().includes(searchText)) ||
-        (vul.interface && vul.interface.toLowerCase().includes(searchText)) ||
-        (vul.title && vul.title.toLowerCase().includes(searchText)) ||
-        (vul.ecu_name && vul.ecu_name.toLowerCase().includes(searchText)) ||
-        (vul.component && vul.component.toLowerCase().includes(searchText))
-      ) counts[label]++;
+      if (allTextLower.includes(searchText)) {
+        counts[label]++;
+      }
     });
   });
 
@@ -100,15 +86,16 @@ async function getProtocolCounts() {
   const counts = { Linux: 0, Bootloader: 0, "Secure Storage firmware": 0, "ECU Firmware": 0, "Sensor Firmware": 0 };
 
   vulnerabilities.forEach(vul => {
+    const allTextLower = Object.values(vul)
+      .filter(val => typeof val === 'string')
+      .join(' ')
+      .toLowerCase();
+
     labels.forEach(label => {
       const searchText = label.toLowerCase();
-      if (
-        (vul.description && vul.description.toLowerCase().includes(searchText)) ||
-        (vul.interface && vul.interface.toLowerCase().includes(searchText)) ||
-        (vul.title && vul.title.toLowerCase().includes(searchText)) ||
-        (vul.protocol && vul.protocol.toLowerCase().includes(searchText)) ||
-        (vul.component && vul.component.toLowerCase().includes(searchText))
-      ) counts[label]++;
+      if (allTextLower.includes(searchText)) {
+        counts[label]++;
+      }
     });
   });
 
@@ -128,7 +115,7 @@ async function renderInterfaceChart() {
       labels: chartLabels,
       datasets: [{
         data: chartData,
-        backgroundColor: ["#4FFAEE", "#ffffff", "#31A49C", "#B8BEBD", "#147A73"],
+        backgroundColor: ["#4FFAEE", "#082c2eff", "#31A49C", "#B8BEBD", "#147A73"],
         borderWidth: 2,
         borderColor: "#ffffff",
         radius: "70%"
@@ -311,7 +298,7 @@ async function renderYearlyChart() {
   const dateOnlyCounts = allYears.map(y => dateYearCounts[y] || 0);
 
   const ctx = document.getElementById("yearlyChart").getContext("2d");
-  new Chart(ctx, {
+  const barChart = new Chart(ctx, {
     type: "bar",
     data: {
       labels: allYears,
@@ -337,6 +324,13 @@ async function renderYearlyChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      onClick: (evt, elements) => {
+        if (elements.length > 0) {
+          const chartIndex = elements[0].index;
+          const selectedYear = barChart.data.labels[chartIndex];
+          window.location.href = `ledger.html?year=${encodeURIComponent(selectedYear)}`;
+        }
+      },
       plugins: {
         legend: {
           labels: {

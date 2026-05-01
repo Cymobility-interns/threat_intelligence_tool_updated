@@ -158,13 +158,10 @@ def fetch_cves_custom(start_date: str, end_date: str):
             sync_state.last_run = datetime.now(timezone.utc)
 
         session.commit()
-
-
-
     session.close()
     print(f"\n Ingestion complete! Total CVEs inserted/updated: {total_inserted}")
 
 
 if __name__ == "__main__":
     # Example usage → change dates as needed
-    fetch_cves_custom("2020-07-19", "2026-05-14")
+    fetch_cves_custom("2022-01-01", "2024-12-31")

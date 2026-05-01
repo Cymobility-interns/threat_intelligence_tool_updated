@@ -6,13 +6,14 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
-  padding-top: 100px; /* Push content below navbar */
+  padding-top: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .content {
@@ -37,15 +38,24 @@ body {
   gap: 20px;
   align-items: center;
   justify-content: center;
-  width: 100vw;
-  height: calc(100vh - 200px); /* Adjust height considering navbar + header */
-  padding: 0 1vw;
+  width: 100%;
+  max-width: 1200px;
+  min-height: calc(100vh - 200px);
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .company-options {
+    flex-direction: column;
+    height: auto;
+  }
 }
 
 .company-option {
   border-radius: 15px;
   width: 35%;
   height: 60vh;
+  min-height: 300px;
   position: relative;
   border: 3px solid cyan;
   cursor: pointer;
@@ -54,6 +64,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .company-option {
+    width: 90%;
+    height: 40vh;
+  }
 }
 
 .company-option img {
@@ -79,6 +96,14 @@ body {
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .company-option p {
+    font-size: 18px;
+    padding: 8px 15px;
+  }
 }
 
 .company-option:hover {

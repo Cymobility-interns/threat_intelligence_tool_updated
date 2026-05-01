@@ -3,12 +3,13 @@ body {
   background: #f8f9fa;
   min-height: 100vh;
   margin: 0;
-  padding: 0; /* Remove padding */
+  padding: 0;
   background-image: url('../images/brandbg.jpg');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -18,12 +19,12 @@ body {
   align-items: center;
   justify-content: center;
   flex: 1;
-  padding: 0 !important; /* Force remove Bootstrap padding */
-  margin: 0 !important; /* Force remove margin */
-  max-width: none !important; /* Remove Bootstrap max-width */
-  width: 100vw !important; /* Full viewport width */
-  height: 100vh; /* Full viewport height */
-  padding-top: 80px !important; /* Account for navbar height */
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+  min-height: calc(100vh - 80px);
+  margin-top: 80px !important;
   position: relative;
 }
 
@@ -36,15 +37,20 @@ h2 {
 }
 
 .carousel-container {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 700px;
-  height: 600px;
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: auto;
+}
+
+@media (max-width: 768px) {
+  .carousel-container {
+    max-width: 90vw;
+  }
 }
 
 .center-car {
@@ -52,8 +58,8 @@ h2 {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 450px;
-  height: 450px;
+  width: 65%;
+  height: 65%;
   border-radius: 50%;
   background: white;
   display: flex;
@@ -66,10 +72,9 @@ h2 {
 }
 
 .center-car img {
-  width: 450px;
-  height: 450px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 50%;
 }
 
 .brand-orbit {
@@ -95,8 +100,9 @@ h2 {
 
 .brand-logo {
   position: absolute;
-  width: 80px;
-  height: 80px;
+  width: 12%;
+  min-width: 40px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: rgba(255,255,255,0.95);
   display: flex;
@@ -124,8 +130,8 @@ h2 {
 }
 
 .brand-logo img {
-  width: 45px;
-  height: 45px;
+  width: 60%;
+  height: 60%;
   object-fit: contain;
   transition: all 0.3s ease;
   pointer-events: none;

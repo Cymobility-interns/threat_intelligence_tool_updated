@@ -7,7 +7,8 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* html, body {
@@ -56,7 +57,7 @@ body {
   padding: 15px 50px;
   gap: 15px;
   overflow-y: auto;
-  height: calc(100vh - 60px);
+  min-height: calc(100vh - 60px);
 }
 
 /* Pie Charts Container */
@@ -282,21 +283,46 @@ body {
   .pie-charts-container {
     flex-direction: column;
     align-items: center;
+    gap: 30px;
   }
 
   .chart-wrapper {
-    max-width: 500px;
+    max-width: 600px;
     width: 100%;
+    padding: 20px;
+    background: rgba(0, 0, 59, 0.6);
+    border: 1px solid rgba(85, 221, 221, 0.2);
   }
 
   .dashboard-content {
-    padding: 30px 40px;
+    padding: 20px 30px;
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-content {
-    padding: 20px;
+    padding: 15px;
+    gap: 20px;
+  }
+
+  .chart-wrapper .chart-inner {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .custom-legend {
+    min-width: unset;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .legend-item {
+    background: rgba(85, 221, 221, 0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
   }
 
   .recent-attacks-table th,
@@ -305,8 +331,40 @@ body {
     font-size: 12px;
   }
 
+  .recent-attacks-table th:nth-child(3),
+  .recent-attacks-table td:nth-child(3) {
+    display: none; /* Hide 'Type of Attack' column on mobile to save space */
+  }
+
   .read-more-btn {
     font-size: 12px;
     padding: 8px 20px;
+  }
+
+  #linechart-section {
+    min-height: 250px;
+  }
+
+  #yearlyChart {
+    height: 200px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-content {
+    padding: 10px;
+  }
+
+  .chart-wrapper h4 {
+    font-size: 14px;
+  }
+
+  .legend-label {
+    font-size: 10px;
+  }
+
+  .canvas-container {
+    width: 120px;
+    height: 120px;
   }
 }

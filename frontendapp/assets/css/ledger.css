@@ -1,13 +1,12 @@
 body {
   font-family: verdana, geneva, tahoma, sans-serif !important;
   background: url("../images/dashboardbgnew.jpg") no-repeat center center fixed;
-  /* background-size: contain;
-  background-size: 100% 100%; */
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Entire page background white */
@@ -50,36 +49,46 @@ h3 {
   /* subtle horizontal line */
 }
 
-/* Fixed table layout to prevent column jumping */
+/* Responsive table layout */
 .table-fixed {
-  table-layout: fixed;
   width: 100%;
 }
 
-.table-fixed th,
-.table-fixed td {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+@media (min-width: 769px) {
+  .table-fixed {
+    table-layout: fixed;
+  }
+  
+  .table-fixed th:nth-child(1),
+  .table-fixed td:nth-child(1) {
+    width: 150px;
+  }
+
+  .table-fixed th:nth-child(2),
+  .table-fixed td:nth-child(2) {
+    width: 400px;
+  }
+
+  .table-fixed th:nth-child(3),
+  .table-fixed td:nth-child(3) {
+    width: 150px;
+  }
 }
 
-/* Specific column widths */
-.table-fixed th:nth-child(1),
-.table-fixed td:nth-child(1) {
-  width: 150px;
-  /* Identifier */
-}
-
-.table-fixed th:nth-child(2),
-.table-fixed td:nth-child(2) {
-  width: 400px;
-  /* Attack Title */
-}
-
-.table-fixed th:nth-child(3),
-.table-fixed td:nth-child(3) {
-  width: 100px;
-  /* Published Date */
+@media (max-width: 768px) {
+  .table-fixed th,
+  .table-fixed td {
+    white-space: normal;
+    word-break: break-word;
+    font-size: 12px;
+    padding: 8px;
+  }
+  
+  .table-fixed th:nth-child(3),
+  .table-fixed td:nth-child(3) {
+    width: 80px;
+    font-size: 10px;
+  }
 }
 
 .table tr:hover {
@@ -120,15 +129,20 @@ a.cve-link:hover {
   text-transform: uppercase;
 }
 
-/* Pagination (sticky at bottom) */
+/* Pagination */
 #pagination {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 0.5rem 0;
+  margin-top: 20px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  #pagination .page-link {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
 }
 
 #pagination .page-item .page-link {
@@ -158,8 +172,9 @@ a.cve-link:hover {
   background-color: #00003B;
   position: fixed;
   top: 0;
-  left: -320px;
+  left: -100%;
   width: 300px;
+  max-width: 85%;
   height: 100%;
   overflow-y: auto;
   transition: left 0.3s ease;

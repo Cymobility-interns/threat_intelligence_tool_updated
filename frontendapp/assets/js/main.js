@@ -6,6 +6,9 @@ console.log("main.js loaded");
 // ── Full dataset cached on page load (never re-fetched)
 let allVulnerabilities = [];
 
+// ── Store year filter from URL
+let activeYearFilter = "";
+
 /* ─────────────────────────────────────────────
    Load Navbar
    ledger.html uses id="navbar" (not "navbar-container")
@@ -30,7 +33,7 @@ async function loadNavbar() {
 function applyAndRender(filters) {
   let data = [...allVulnerabilities];
 
-  const { search = "", from = "", to = "", cveType = "" } = filters;
+  const { search = "", from = "", to = "", cveType = "", cvss = "", interface: attackInterface = "", level = "", company = "", countermeasures = "" } = filters;
 
   // 1. CVE Type filter
   if (cveType === "CVE") {
@@ -53,7 +56,65 @@ function applyAndRender(filters) {
     data = data.filter(v => v.published_date && new Date(v.published_date) <= toDt);
   }
 
-  // 3. Text search handled inside renderVulnerabilities
+  // 3. Handle URL year filter (published date OR cve-yyyy-*****)
+  if (activeYearFilter) {
+    data = data.filter(v => {
+      const cveMatch = v.cve_id && String(v.cve_id).toUpperCase().includes(`CVE-${activeYearFilter}-`);
+      const dateMatch = v.published_date && String(v.published_date).startsWith(activeYearFilter);
+      return cveMatch || dateMatch;
+    });
+  }
+
+  // 4. CVSS Severity Filter
+  if (cvss) {
+    data = data.filter(v => {
+      const score = parseFloat(v.cvss_score);
+      if (isNaN(score)) return false;
+      if (cvss === "Critical") return score >= 9.0;
+      if (cvss === "High") return score >= 7.0 && score < 9.0;
+      if (cvss === "Medium") return score >= 4.0 && score < 7.0;
+      if (cvss === "Low") return score >= 0.1 && score < 4.0;
+      return true;
+    });
+  }
+
+  // 5. Attack Interface Filter
+  if (attackInterface) {
+    data = data.filter(v => {
+      const s = String(v.interface || "").toUpperCase();
+      return s.includes(attackInterface.toUpperCase());
+    });
+  }
+
+  // 6. Level of Attack Filter
+  if (level) {
+    data = data.filter(v => {
+      const s = String(v.level_of_attack || "").toUpperCase();
+      return s.includes(level.toUpperCase());
+    });
+  }
+
+  // 7. Company / Brand Filter
+  if (company) {
+    const escapedCompany = company.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b${escapedCompany}\\b`, 'i');
+    data = data.filter(v => {
+      const s = String(v.company || "");
+      return regex.test(s);
+    });
+  }
+
+  // 8. Countermeasures Filter
+  if (countermeasures) {
+    data = data.filter(v => {
+      const hasC = Boolean(v.countermeasures && String(v.countermeasures).trim() !== "" && String(v.countermeasures).toLowerCase() !== "none" && String(v.countermeasures).toLowerCase() !== "not available");
+      if (countermeasures === "Yes") return hasC;
+      if (countermeasures === "No") return !hasC;
+      return true;
+    });
+  }
+
+  // 4. Text search handled inside renderVulnerabilities
   renderVulnerabilities(data, search);
 }
 
@@ -70,11 +131,14 @@ async function init() {
   console.log("Full dataset:", allVulnerabilities.length, "records");
 
   // 3. If arriving via pie-chart click (?filter=Bluetooth) pre-fill search box
-  const urlFilter = new URLSearchParams(window.location.search).get("filter");
-  const initialSearch = urlFilter || "";
-  if (urlFilter) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlFilter = urlParams.get("filter");
+  activeYearFilter = urlParams.get("year") || "";
+
+  const initialSearch = urlFilter || activeYearFilter || "";
+  if (initialSearch) {
     const si = document.getElementById("ledger-search");
-    if (si) si.value = urlFilter;
+    if (si) si.value = initialSearch;
   }
 
   // 4. First render
@@ -86,7 +150,10 @@ async function init() {
     console.log("Filters →", filters);
 
     if (filters.resetAll) {
-      applyAndRender({ search: "", from: "", to: "", cveType: "" });
+      activeYearFilter = ""; // Clear the year filter on reset
+      // Optionally remove it from the URL so it doesn't persist on refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
+      applyAndRender({ search: "", from: "", to: "", cveType: "", cvss: "", interface: "", level: "", company: "", countermeasures: "" });
       return;
     }
 
