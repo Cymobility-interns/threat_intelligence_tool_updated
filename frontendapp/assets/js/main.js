@@ -1,12 +1,10 @@
 import { fetchVulnerabilities } from "./api.js";
+import { bindLogoutButton } from "./auth.js";
 import { renderVulnerabilities, setupLedgerFilters } from "./ledger.js";
+import { showLoader, hideLoader, toast } from "./utils.js";
 
-console.log("main.js loaded");
-
-// ── Full dataset cached on page load (never re-fetched)
+// Full dataset cached on page load (never re-fetched once filters change)
 let allVulnerabilities = [];
-
-// ── Store year filter from URL
 let activeYearFilter = "";
 
 /* ─────────────────────────────────────────────
@@ -28,14 +26,15 @@ async function loadNavbar() {
 
 /* ─────────────────────────────────────────────
    Apply filters and render.
-   filters = { search, from, to, cveType }
 ───────────────────────────────────────────── */
 function applyAndRender(filters) {
   let data = [...allVulnerabilities];
+  const {
+    search = "", from = "", to = "", cveType = "", cvss = "",
+    interface: attackInterface = "", level = "", company = "", countermeasures = "",
+  } = filters;
 
-  const { search = "", from = "", to = "", cveType = "", cvss = "", interface: attackInterface = "", level = "", company = "", countermeasures = "" } = filters;
-
-  // 1. CVE Type filter
+  // 1. CVE Type
   if (cveType === "CVE") {
     data = data.filter(v => v.cve_id && /^CVE-/i.test(String(v.cve_id).trim()));
   } else if (cveType === "Non-CVE") {
@@ -45,7 +44,7 @@ function applyAndRender(filters) {
     });
   }
 
-  // 2. Date range filter
+  // 2. Date range
   if (from) {
     const fromDt = new Date(from);
     data = data.filter(v => v.published_date && new Date(v.published_date) >= fromDt);
@@ -56,7 +55,7 @@ function applyAndRender(filters) {
     data = data.filter(v => v.published_date && new Date(v.published_date) <= toDt);
   }
 
-  // 3. Handle URL year filter (published date OR cve-yyyy-*****)
+  // 3. URL year filter
   if (activeYearFilter) {
     data = data.filter(v => {
       const cveMatch = v.cve_id && String(v.cve_id).toUpperCase().includes(`CVE-${activeYearFilter}-`);
@@ -65,7 +64,7 @@ function applyAndRender(filters) {
     });
   }
 
-  // 4. CVSS Severity Filter
+  // 4. CVSS Severity
   if (cvss) {
     data = data.filter(v => {
       const score = parseFloat(v.cvss_score);
@@ -78,59 +77,64 @@ function applyAndRender(filters) {
     });
   }
 
-  // 5. Attack Interface Filter
+  // 5. Attack Interface
   if (attackInterface) {
-    data = data.filter(v => {
-      const s = String(v.interface || "").toUpperCase();
-      return s.includes(attackInterface.toUpperCase());
-    });
+    const needle = attackInterface.toUpperCase();
+    data = data.filter(v => String(v.interface || "").toUpperCase().includes(needle));
   }
 
-  // 6. Level of Attack Filter
+  // 6. Level of Attack
   if (level) {
-    data = data.filter(v => {
-      const s = String(v.level_of_attack || "").toUpperCase();
-      return s.includes(level.toUpperCase());
-    });
+    const needle = level.toUpperCase();
+    data = data.filter(v => String(v.level_of_attack || "").toUpperCase().includes(needle));
   }
 
-  // 7. Company / Brand Filter
+  // 7. Company / Brand
   if (company) {
     const escapedCompany = company.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(`\\b${escapedCompany}\\b`, 'i');
-    data = data.filter(v => {
-      const s = String(v.company || "");
-      return regex.test(s);
-    });
+    const regex = new RegExp(`\\b${escapedCompany}\\b`, "i");
+    data = data.filter(v => regex.test(String(v.company || "")));
   }
 
-  // 8. Countermeasures Filter
+  // 8. Countermeasures
   if (countermeasures) {
     data = data.filter(v => {
-      const hasC = Boolean(v.countermeasures && String(v.countermeasures).trim() !== "" && String(v.countermeasures).toLowerCase() !== "none" && String(v.countermeasures).toLowerCase() !== "not available");
+      const raw = String(v.countermeasures || "").trim().toLowerCase();
+      const hasC = raw && raw !== "none" && raw !== "not available";
       if (countermeasures === "Yes") return hasC;
       if (countermeasures === "No") return !hasC;
       return true;
     });
   }
 
-  // 4. Text search handled inside renderVulnerabilities
+  // Text search handled inside renderVulnerabilities
   renderVulnerabilities(data, search);
 }
 
-/* ─────────────────────────────────────────────
-   Page Init
-───────────────────────────────────────────── */
 async function init() {
-  // 1. Inject navbar
   await loadNavbar();
+  bindLogoutButton(document);
 
-  // 2. Fetch full dataset once — no backend params
-  console.log("INIT: fetching full dataset...");
-  allVulnerabilities = await fetchVulnerabilities();
-  console.log("Full dataset:", allVulnerabilities.length, "records");
+  // Prefer the .table-responsive wrapper — it has real height even when empty.
+  const tableHost = document.getElementById("vuln-table-body")?.closest(".table-responsive")
+                 || document.querySelector(".ledger-table-wrapper")
+                 || document.body;
 
-  // 3. If arriving via pie-chart click (?filter=Bluetooth) pre-fill search box
+  showLoader(tableHost, "Loading vulnerabilities…");
+  try {
+    allVulnerabilities = await fetchVulnerabilities();
+    if (!allVulnerabilities.length) {
+      toast("No vulnerabilities found.", "info");
+    }
+  } catch (err) {
+    console.error("Failed to load vulnerabilities:", err);
+    toast("Failed to load vulnerabilities. Please refresh.", "error", { duration: 6000 });
+    allVulnerabilities = [];
+  } finally {
+    hideLoader(tableHost);
+  }
+
+  // Pre-fill from URL params
   const urlParams = new URLSearchParams(window.location.search);
   const urlFilter = urlParams.get("filter");
   activeYearFilter = urlParams.get("year") || "";
@@ -141,27 +145,19 @@ async function init() {
     if (si) si.value = initialSearch;
   }
 
-  // 4. First render
   applyAndRender({ search: initialSearch });
 
-  // 5. Wire all filter/search events
-  //    setupLedgerFilters always emits FULL state — no merging needed here
   setupLedgerFilters((filters) => {
-    console.log("Filters →", filters);
-
     if (filters.resetAll) {
-      activeYearFilter = ""; // Clear the year filter on reset
-      // Optionally remove it from the URL so it doesn't persist on refresh
+      activeYearFilter = "";
       window.history.replaceState({}, document.title, window.location.pathname);
       applyAndRender({ search: "", from: "", to: "", cveType: "", cvss: "", interface: "", level: "", company: "", countermeasures: "" });
       return;
     }
-
     applyAndRender(filters);
   });
 }
 
-// Start after DOM is ready (module scripts are deferred by default)
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {

@@ -1,25 +1,15 @@
-import { API_BASE } from "./api.js";
-
-// async function protectPage() {
-//   const response = await fetch(`${API_BASE}/me`, { credentials: "include" });
-//   if (!response.ok) {
-//     window.location.href = `login.html?next=${window.location.pathname.split("/").pop()}`;
-//   }
-// }
-// document.addEventListener("DOMContentLoaded", protectPage);
+import {
+  escapeHtml,
+  debounce,
+  safeSession,
+  formatDateDDMMYYYY,
+  normalizeCve,
+  genFallbackId,
+} from "./utils.js";
 
 let currentPage = 1;
 const entriesPerPage = 10;
 let vulnerabilitiesData = [];
-
-// -----------------------------
-// Helper: format ISO date to DD-MM-YYYY
-// -----------------------------
-function formatDateToDDMMYYYY(rawDate) {
-  if (!rawDate) return "Not Available";
-  const date = new Date(rawDate);
-  return isNaN(date) ? "Not Available" : date.toLocaleDateString("en-GB").replace(/\//g, "-");
-}
 
 // -----------------------------
 // Render one page of vulnerabilities (robust CVE handling)
@@ -27,64 +17,41 @@ function formatDateToDDMMYYYY(rawDate) {
 function renderVulnerabilitiesPage(page) {
   const tbody = document.getElementById("vuln-table-body");
   const emptyState = document.getElementById("empty-state");
+  if (!tbody) return;
   tbody.innerHTML = "";
 
   if (!Array.isArray(vulnerabilitiesData) || vulnerabilitiesData.length === 0) {
-    emptyState.style.display = "block";
-    document.getElementById("pagination").innerHTML = "";
+    if (emptyState) emptyState.style.display = "block";
+    const pag = document.getElementById("pagination");
+    if (pag) pag.innerHTML = "";
     return;
-  } else {
-    emptyState.style.display = "none";
   }
+  if (emptyState) emptyState.style.display = "none";
 
-  //Remember current page for back navigation
-  sessionStorage.setItem('lastSource', 'ledger');
-  sessionStorage.setItem('ledgerCurrentPage', currentPage);
-
-
-  // helper: decide whether a cve value is valid
-  function normalizeCve(val) {
-    if (val === undefined || val === null) return null;
-    const s = String(val).trim();
-    if (!s) return null;
-    const lower = s.toLowerCase();
-    // treat these literal values as missing
-    if (lower === "not available" || lower === "n/a" || lower === "null" || lower === "undefined") return null;
-    return s;
-  }
-
-  // helper: generate a fallback unique id
-  function genFallback() {
-    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-      return `internal-${crypto.randomUUID()}`;
-    }
-    // fallback if crypto.randomUUID not available
-    return `internal-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-  }
+  // Remember current page for back-navigation
+  safeSession.set("lastSource", "ledger");
+  safeSession.set("ledgerCurrentPage", String(currentPage));
 
   const start = (page - 1) * entriesPerPage;
   const end = start + entriesPerPage;
   const pageData = vulnerabilitiesData.slice(start, end);
 
-  pageData.forEach((vuln, idx) => {
+  // Build rows in a fragment to minimise reflow
+  const frag = document.createDocumentFragment();
+
+  pageData.forEach((vuln) => {
     const rawDate = vuln.published_date || vuln.published || vuln.date || vuln.created_at || null;
-    const formattedDate = formatDateToDDMMYYYY(rawDate);
+    const formattedDate = formatDateDDMMYYYY(rawDate);
 
     const normalizedCve = normalizeCve(vuln.cve_id ?? vuln.cve ?? vuln.identifier);
-    const fallbackId = (vuln.id || vuln._id || vuln.db_id) ? `internal-${vuln.id || vuln._id || vuln.db_id}` : genFallback();
+    const fallbackId = (vuln.id || vuln._id || vuln.db_id)
+      ? `internal-${vuln.id || vuln._id || vuln.db_id}`
+      : genFallbackId();
     const uniqueId = normalizedCve || fallbackId;
-
-    //show "Not Available" instead of ID numbers
     const displayId = normalizedCve || "Not Available";
-
     const title = vuln.title || vuln.summary || "Not Available";
-
-    // Determine if this entry has a real CVE ID
     const hasCveId = !!normalizedCve;
 
-    // Build the Identifier cell content
-    // - WITH cve_id  → teal (default table color, cve-link class)
-    // - WITHOUT cve_id → amber + "Date Only" badge (classified purely by published date)
     const identifierCell = hasCveId
       ? `<td>${escapeHtml(displayId)}</td>`
       : `<td class="no-cve-id">${escapeHtml(displayId)}</td>`;
@@ -96,34 +63,19 @@ function renderVulnerabilitiesPage(page) {
       <td>${escapeHtml(title)}</td>
       <td>${escapeHtml(formattedDate)}</td>
     `;
-    // Make entire row clickable
-    const detailsUrl = `details.html?cve=${encodeURIComponent(uniqueId)}`;
     row.style.cursor = "pointer";
     row.addEventListener("click", (e) => {
       if (e.target.closest('input[type="checkbox"]')) return;
-      sessionStorage.setItem('lastSource', 'ledger');
-      sessionStorage.setItem('ledgerCurrentPage', currentPage);
+      safeSession.set("lastSource", "ledger");
+      safeSession.set("ledgerCurrentPage", String(currentPage));
       window.location.href = `details.html?cve=${encodeURIComponent(uniqueId)}`;
     });
 
-
-
-    tbody.appendChild(row);
+    frag.appendChild(row);
   });
 
-
+  tbody.appendChild(frag);
   renderPagination();
-}
-
-// small helper to avoid injecting raw HTML
-function escapeHtml(text) {
-  if (text === null || text === undefined) return "";
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 // -----------------------------
@@ -131,6 +83,7 @@ function escapeHtml(text) {
 // -----------------------------
 function renderPagination() {
   const pagination = document.getElementById("pagination");
+  if (!pagination) return;
   pagination.innerHTML = "";
 
   const totalPages = Math.ceil(vulnerabilitiesData.length / entriesPerPage);
@@ -138,48 +91,41 @@ function renderPagination() {
 
   const maxVisiblePages = 5;
 
-  // Previous
-  const prevLi = document.createElement("li");
-  prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-  prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
-  prevLi.addEventListener("click", e => {
-    e.preventDefault();
-    if (currentPage > 1) {
-      currentPage--;
-      renderVulnerabilitiesPage(currentPage);
-    }
-  });
-  pagination.appendChild(prevLi);
+  const makePageItem = (label, disabled, active, onClick) => {
+    const li = document.createElement("li");
+    li.className = `page-item${disabled ? " disabled" : ""}${active ? " active" : ""}`;
+    const a = document.createElement("a");
+    a.className = "page-link";
+    a.href = "#";
+    a.textContent = label;
+    li.appendChild(a);
+    li.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!disabled) onClick();
+    });
+    return li;
+  };
 
-  // Page numbers
+  pagination.appendChild(makePageItem("Previous", currentPage === 1, false, () => {
+    currentPage--;
+    renderVulnerabilitiesPage(currentPage);
+  }));
+
   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
   let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
   startPage = Math.max(1, endPage - maxVisiblePages + 1);
 
   for (let i = startPage; i <= endPage; i++) {
-    const li = document.createElement("li");
-    li.className = `page-item ${i === currentPage ? "active" : ""}`;
-    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-    li.addEventListener("click", e => {
-      e.preventDefault();
+    pagination.appendChild(makePageItem(String(i), false, i === currentPage, () => {
       currentPage = i;
       renderVulnerabilitiesPage(currentPage);
-    });
-    pagination.appendChild(li);
+    }));
   }
 
-  // Next
-  const nextLi = document.createElement("li");
-  nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-  nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
-  nextLi.addEventListener("click", e => {
-    e.preventDefault();
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderVulnerabilitiesPage(currentPage);
-    }
-  });
-  pagination.appendChild(nextLi);
+  pagination.appendChild(makePageItem("Next", currentPage === totalPages, false, () => {
+    currentPage++;
+    renderVulnerabilitiesPage(currentPage);
+  }));
 }
 
 // -----------------------------
@@ -188,32 +134,20 @@ function renderPagination() {
 export function renderVulnerabilities(data, searchTerm) {
   // ── URL filter: only respected on FIRST load (when called from init without searchTerm)
   // ── When called from the search button, searchTerm is passed explicitly
-  let filter = (searchTerm !== undefined)
+  const filter = (searchTerm !== undefined)
     ? searchTerm
     : new URLSearchParams(window.location.search).get("filter") || "";
-
   const originalFilter = filter.trim();
 
-  // ── Normalize: lowercase + replace hyphens/underscores with SPACES.
-  // Replacing (not removing) preserves word boundaries so:
-  //   "CVE-2025-5833" → "cve 2025 5833"  (numbers become separate words)
-  //   "anti-theft"    → "anti theft"
-  const normalize = (str) =>
-    String(str || "").toLowerCase().replace(/[-_]/g, " ");
-
+  // Normalise: lowercase + replace hyphens/underscores with SPACES so word boundaries survive
+  const normalize = (str) => String(str || "").toLowerCase().replace(/[-_]/g, " ");
   const normFilter = normalize(originalFilter).trim();
 
   if (normFilter) {
-    // Escape any regex special characters in user input
     const escaped = normFilter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    // \b around the term = must match a full word.
-    // "hero" → matches "hero", "hero motocorp"
-    //        → does NOT match "heroic"
     const searchRegex = new RegExp(`\\b${escaped}\\b`, "i");
 
-    data = data.filter(vul => {
-      // ── Full raw text (for special-case handlers that need original casing) ──
+    data = data.filter((vul) => {
       const rawText = [
         vul.cve_id, vul.source, vul.company, vul.title,
         vul.description, vul.attack_path, vul.interface,
@@ -229,22 +163,19 @@ export function renderVulnerabilities(data, searchTerm) {
         })(),
       ].filter(Boolean).join(" ");
 
-      // ── Special: Wi-Fi / wifi ──
+      // Special: Wi-Fi / wifi
       if (originalFilter.toLowerCase().replace(/-/g, "").includes("wifi")) {
         return /\bwi.?fi\b/i.test(rawText) || normalize(rawText).includes("wifi");
       }
-
-      // ── Special: CAN — strip ZDI-CAN-xxxxx entries so they don't false-match ──
+      // Special: CAN — strip ZDI-CAN-xxxxx so they don't false-match
       if (originalFilter.trim().toUpperCase() === "CAN") {
         return /\bCAN\b/.test(rawText.replace(/ZDI-CAN-\d+/gi, ""));
       }
-
-      // ── Generic: word-boundary regex on normalized full text ──
       return searchRegex.test(normalize(rawText));
     });
   }
 
-  // ── Sort: newest first (CVE year if present, else published_date)
+  // Newest first (CVE year if present, else published_date)
   data.sort((a, b) => {
     const getTs = (vul) => {
       if (vul.cve_id && /CVE-\d{4}-/i.test(vul.cve_id)) {
@@ -262,22 +193,18 @@ export function renderVulnerabilities(data, searchTerm) {
   if (normFilter) {
     currentPage = 1;
   } else {
-    const savedPage = parseInt(sessionStorage.getItem("ledgerCurrentPage")) || 1;
-    currentPage = savedPage;
+    currentPage = parseInt(safeSession.get("ledgerCurrentPage"), 10) || 1;
   }
 
   renderVulnerabilitiesPage(currentPage);
 }
-
 
 // -----------------------------
 // Setup Ledger Filters
 // -----------------------------
 /**
  * setupLedgerFilters(onFilterChange)
- * Always calls onFilterChange with the COMPLETE filter state:
- *   { search, from, to, cveType, resetAll? }
- * Never sends partial objects — eliminates stale-state bugs.
+ * Always calls onFilterChange with the COMPLETE filter state — never partials.
  */
 export function setupLedgerFilters(onFilterChange) {
   const sidebar = document.getElementById("filter-sidebar");
@@ -297,23 +224,23 @@ export function setupLedgerFilters(onFilterChange) {
   const companyInput = document.getElementById("filter-company");
   const countermeasuresSelect = document.getElementById("filter-countermeasures");
 
-  // ── Internal state (single source of truth inside this function) ──
-  let state = { search: "", from: "", to: "", cveType: "", cvss: "", interface: "", level: "", company: "", countermeasures: "" };
+  const initialState = () => ({
+    search: "", from: "", to: "", cveType: "", cvss: "",
+    interface: "", level: "", company: "", countermeasures: "",
+  });
+  let state = initialState();
 
   const emit = () => {
-    if (typeof onFilterChange === "function") {
-      onFilterChange({ ...state });
-    }
+    if (typeof onFilterChange === "function") onFilterChange({ ...state });
   };
 
-  // ── Overlay for sidebar backdrop ──
+  // Sidebar overlay
   let overlay = document.getElementById("filter-overlay");
   if (!overlay) {
     overlay = document.createElement("div");
     overlay.id = "filter-overlay";
     document.body.appendChild(overlay);
   }
-
   const openSidebar = () => { sidebar?.classList.add("open"); overlay.classList.add("active"); };
   const closeSidebar = () => { sidebar?.classList.remove("open"); overlay.classList.remove("active"); };
 
@@ -321,34 +248,28 @@ export function setupLedgerFilters(onFilterChange) {
   closeBtn?.addEventListener("click", closeSidebar);
   overlay?.addEventListener("click", closeSidebar);
 
-  // ── Live search: filter as user types (debounced 250ms) ──
-  let debounceTimer = null;
-  searchInput?.addEventListener("input", () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      state.search = searchInput.value.trim();
-      emit();
-    }, 250);
-  });
+  // Live search — debounced 250ms via shared util
+  const debouncedSearch = debounce(() => {
+    state.search = searchInput?.value.trim() ?? "";
+    emit();
+  }, 250);
+  searchInput?.addEventListener("input", debouncedSearch);
 
-  // ── Search button click ──
   searchBtn?.addEventListener("click", () => {
-    clearTimeout(debounceTimer);
+    debouncedSearch.cancel();
     state.search = searchInput?.value?.trim() ?? "";
     emit();
   });
 
-  // ── Enter key in search box ──
   searchInput?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      clearTimeout(debounceTimer);
+      debouncedSearch.cancel();
       state.search = searchInput.value.trim();
       emit();
     }
   });
 
-  // ── Apply sidebar filters (preserves current search) ──
   applyBtn?.addEventListener("click", () => {
     state.from = fromInput?.value ?? "";
     state.to = toInput?.value ?? "";
@@ -358,49 +279,23 @@ export function setupLedgerFilters(onFilterChange) {
     state.level = levelSelect?.value ?? "";
     state.company = companyInput?.value ?? "";
     state.countermeasures = countermeasuresSelect?.value ?? "";
-    // state.search stays unchanged — keeps the text search active
     closeSidebar();
     emit();
   });
 
-  // ── Reset inside sidebar (clears everything except search) ──
   resetFiltersBtn?.addEventListener("click", () => {
-    if (fromInput) fromInput.value = "";
-    if (toInput) toInput.value = "";
-    if (cveTypeSelect) cveTypeSelect.value = "";
-    if (cvssSelect) cvssSelect.value = "";
-    if (interfaceSelect) interfaceSelect.value = "";
-    if (levelSelect) levelSelect.value = "";
-    if (companyInput) companyInput.value = "";
-    if (countermeasuresSelect) countermeasuresSelect.value = "";
-    
-    state.from = "";
-    state.to = "";
-    state.cveType = "";
-    state.cvss = "";
-    state.interface = "";
-    state.level = "";
-    state.company = "";
-    state.countermeasures = "";
+    [fromInput, toInput, cveTypeSelect, cvssSelect, interfaceSelect, levelSelect, companyInput, countermeasuresSelect]
+      .forEach(el => { if (el) el.value = ""; });
+    Object.assign(state, initialState(), { search: state.search });
     emit();
   });
 
-  // ── Reset ALL (clears everything) ──
   resetAllBtn?.addEventListener("click", () => {
-    if (fromInput) fromInput.value = "";
-    if (toInput) toInput.value = "";
-    if (cveTypeSelect) cveTypeSelect.value = "";
-    if (cvssSelect) cvssSelect.value = "";
-    if (interfaceSelect) interfaceSelect.value = "";
-    if (levelSelect) levelSelect.value = "";
-    if (companyInput) companyInput.value = "";
-    if (countermeasuresSelect) countermeasuresSelect.value = "";
-    if (searchInput) searchInput.value = "";
-    
-    state = { search: "", from: "", to: "", cveType: "", cvss: "", interface: "", level: "", company: "", countermeasures: "" };
+    [fromInput, toInput, cveTypeSelect, cvssSelect, interfaceSelect, levelSelect, companyInput, countermeasuresSelect, searchInput]
+      .forEach(el => { if (el) el.value = ""; });
+    state = initialState();
     if (typeof onFilterChange === "function") {
       onFilterChange({ ...state, resetAll: true });
     }
   });
 }
-

@@ -13,11 +13,16 @@
       <a href="dashboard.html">Dashboard</a>
       <a href="ledger.html">Attack Ledger</a>
       <!-- <a href="company.html">Brands</a> -->
+      <!-- <a href="login.html">Logout</a> -->
+      <a id="logoutBtn">Logout</a>
       <i class="bi bi-x close-icon" id="closeMenu"></i> <!-- ✅ X icon at the end -->
     </div>
   </div>
 </nav>
-
+<script>
+  import { bindLogoutButton } from "../assets/js/auth.js";
+  bindLogoutButton(document);
+</script>
 <style>
   .navbar-custom {
     background-color: #00003B;
